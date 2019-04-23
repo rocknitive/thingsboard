@@ -22,9 +22,9 @@ import mdiIconSet from '../svg/mdi.svg';
 
 /* eslint-enable import/no-unresolved, import/default */
 
-const PRIMARY_BACKGROUND_COLOR = "#03a9f4";//#2856b6";//"#3f51b5";
-const SECONDARY_BACKGROUND_COLOR = "#5e7afb";
-const HUE3_COLOR = "#a7c1de";
+const PRIMARY_BACKGROUND_COLOR = "#5c6bc0";//"#305680";//"#2856b6";//"#3f51b5";
+const SECONDARY_BACKGROUND_COLOR = "#9fa8da";
+const HUE3_COLOR = "#c5cae9";
 
 /*@ngInject*/
 export default function AppConfig($provide,
@@ -133,15 +133,19 @@ export default function AppConfig($provide,
     }
 
     function rocknitiveTheme() {
-        var tbPrimaryPalette = $mdThemingProvider.extendPalette('light-blue');
+        var tbPrimaryPalette = $mdThemingProvider.extendPalette('indigo', {
+            '500': PRIMARY_BACKGROUND_COLOR,
+            '600': SECONDARY_BACKGROUND_COLOR,
+            'A100': HUE3_COLOR
+        });
 
-        var tbAccentPalette = $mdThemingProvider.extendPalette('deep-orange');
+        var tbAccentPalette = $mdThemingProvider.extendPalette('deep-purple');
 
         $mdThemingProvider.definePalette('tb-primary', tbPrimaryPalette);
         $mdThemingProvider.definePalette('tb-accent', tbAccentPalette);
 
         var tbDarkPrimaryPalette = $mdThemingProvider.extendPalette('tb-primary', {
-            '500': '#5e7afb'
+            '500': '#90caf9'
         });
 
         var tbDarkPrimaryBackgroundPalette = $mdThemingProvider.extendPalette('tb-primary', {
@@ -168,9 +172,10 @@ export default function AppConfig($provide,
 
         if (theme === 'blueGray') {
             blueGrayTheme();
-        } else {
-            //indigoTheme();
+        } else if (theme === 'rocknitiveTheme') {
             rocknitiveTheme();
+        } else {
+            indigoTheme();
         }
 
         $mdThemingProvider.setDefaultTheme('default');

@@ -21,12 +21,29 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs19950" />
+     id="defs19950">
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       x1="72"
+       y1="0"
+       x2="0"
+       y2="72"
+       id="linearGradient-1">
+      <stop
+         stop-color="#5CFFFF"
+         offset="0%"
+         id="stop2" />
+      <stop
+         stop-color="#5C5CFF"
+         offset="100%"
+         id="stop4" />
+    </linearGradient>
+  </defs>
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -36,8 +53,8 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1270"
-     inkscape:window-height="1086"
+     inkscape:window-width="907"
+     inkscape:window-height="894"
      id="namedview19948"
      showgrid="false"
      inkscape:pagecheckerboard="true"
@@ -46,8 +63,8 @@
      inkscape:zoom="1.475"
      inkscape:cx="158.64407"
      inkscape:cy="132.88136"
-     inkscape:window-x="469"
-     inkscape:window-y="11"
+     inkscape:window-x="589"
+     inkscape:window-y="194"
      inkscape:window-maximized="0"
      inkscape:current-layer="g4241" />
   <g
@@ -60,18 +77,52 @@
     <g
        id="g4241"
        fill="#fff">
-      <path
-         id="path3801"
-         d="m 91.583974,804.56339 v 0 c 8.812736,0 15.956856,7.92227 15.956856,17.69492 v 141.55932 c 0,9.77264 -7.14412,17.69492 -15.956856,17.69492 -8.812726,0 -15.956854,-7.92228 -15.956854,-17.69492 v -141.55932 0 c 0,-9.77265 7.144128,-17.69492 15.956854,-17.69492 z m 47.870576,70.77967 v 0 c 8.81273,0 15.95685,7.92227 15.95685,17.6949 v 70.77967 c 0,9.77264 -7.14412,17.69492 -15.95685,17.69492 -8.81274,0 -15.95685,-7.92228 -15.95685,-17.69492 v -70.77967 c 0,-9.77263 7.14411,-17.6949 15.95685,-17.6949 z m 47.87056,0 c 8.81274,0 15.95687,7.92227 15.95687,17.6949 v 70.77967 c 0,9.77264 -7.14413,17.69492 -15.95687,17.69492 -8.81272,0 -15.95685,-7.92228 -15.95685,-17.69492 v -70.77967 c 0,-9.77263 7.14413,-17.6949 15.95685,-17.6949 z m 47.87058,-70.77967 c 8.81274,0 15.95685,7.92227 15.95685,17.69492 v 141.55932 c 0,9.77264 -7.14411,17.69492 -15.95685,17.69492 -8.81274,0 -15.95686,-7.92228 -15.95686,-17.69492 v -141.55932 0 c 0,-9.77265 7.14412,-17.69492 15.95686,-17.69492 z"
-         inkscape:connector-curvature="0"
-         style="fill:#ffffff;stroke-width:117.62400055" />
-      <ellipse
-         id="path20785"
-         cx="160.74576"
-         cy="892.73291"
-         style="fill:#000000;fill-opacity:0.01265821;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         rx="152.41762"
-         ry="146.65492" />
+      <g
+         id="rocknitive-logo-white-notext"
+         transform="matrix(4.375,0,0,4.375,3.288135,735.22438)">
+        <circle
+           style="fill:url(#linearGradient-1);fill-rule:nonzero"
+           id="Oval"
+           cx="36"
+           cy="36"
+           r="36" />
+        <g
+           style="fill:#ffffff"
+           id="Finger1"
+           transform="translate(14,16)">
+          <path
+             inkscape:connector-curvature="0"
+             d="m 4,16 c 2.209139,0 4,1.790861 4,4 V 36 C 8,38.209139 6.209139,40 4,40 1.790861,40 0,38.209139 0,36 V 20 c 0,-2.209139 1.790861,-4 4,-4 z"
+             id="Finger1b" />
+          <path
+             inkscape:connector-curvature="0"
+             d="M 4,0 C 6.209139,0 8,1.790861 8,4 V 20 C 8,22.209139 6.209139,24 4,24 1.790861,24 0,22.209139 0,20 V 4 C 0,1.790861 1.790861,0 4,0 Z"
+             id="Finger1a" />
+        </g>
+        <path
+           style="fill:#ffffff"
+           inkscape:connector-curvature="0"
+           d="m 30,32 c 2.209139,0 4,1.790861 4,4 v 16 c 0,2.209139 -1.790861,4 -4,4 -2.209139,0 -4,-1.790861 -4,-4 V 36 c 0,-2.209139 1.790861,-4 4,-4 z"
+           id="Finger2" />
+        <path
+           style="fill:#ffffff"
+           inkscape:connector-curvature="0"
+           d="m 42,32 c 2.209139,0 4,1.790861 4,4 v 16 c 0,2.209139 -1.790861,4 -4,4 -2.209139,0 -4,-1.790861 -4,-4 V 36 c 0,-2.209139 1.790861,-4 4,-4 z"
+           id="Finger3" />
+        <g
+           style="fill:#ffffff"
+           id="Finger4"
+           transform="translate(50,16)">
+          <path
+             inkscape:connector-curvature="0"
+             d="m 4,16 c 2.209139,0 4,1.790861 4,4 V 36 C 8,38.209139 6.209139,40 4,40 1.790861,40 0,38.209139 0,36 V 20 c 0,-2.209139 1.790861,-4 4,-4 z"
+             id="Finger4b" />
+          <path
+             inkscape:connector-curvature="0"
+             d="M 4,0 C 6.209139,0 8,1.790861 8,4 V 20 C 8,22.209139 6.209139,24 4,24 1.790861,24 0,22.209139 0,20 V 4 C 0,1.790861 1.790861,0 4,0 Z"
+             id="Finger4a" />
+        </g>
+      </g>
     </g>
   </g>
 </svg>

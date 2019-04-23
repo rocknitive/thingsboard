@@ -19,13 +19,14 @@
 
 $gray: #eee !default;
 
-$primary-palette-color: "light-blue" !default;
+$primary-palette-color: "indigo" !default;
 $default: "500" !default;
 $hue-1: "300" !default;
 $hue-2: "800" !default;
 $hue-3: "a100" !default;
 
-$primary-default: #03a9f4 !default; //material-color($primary-palette-color, $default);
+// $primary-default: #03a9f4 !default;
+$primary-default: material-color($primary-palette-color, $default) !default;
 $primary-hue-1: material-color($primary-palette-color, $hue-1) !default;
 $primary-hue-2: material-color($primary-palette-color, $hue-2) !default;
 $primary-hue-3: rgb(207, 216, 220) !default;
