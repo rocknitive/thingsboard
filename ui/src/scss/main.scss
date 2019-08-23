@@ -248,10 +248,10 @@ label {
     }
 
     &.tb-error {
-      color: rgb(221, 44, 0);
+      color: rgb(255, 0, 0);
 
       &.tb-required::after {
-        color: rgb(221, 44, 0);
+        color: rgb(255, 0, 0);
       }
     }
   }
@@ -329,7 +329,7 @@ pre.tb-highlight {
     font-family: monospace;
     font-size: 16px;
     font-weight: 700;
-    color: #303030;
+    color: #fff;
     vertical-align: bottom;
   }
 }
@@ -348,12 +348,12 @@ pre.tb-highlight {
 
   md-toolbar.md-table-toolbar.md-default-theme:not(.md-menu-toolbar).md-default .md-button[disabled],
   md-toolbar.md-table-toolbar:not(.md-menu-toolbar).md-default .md-button[disabled] {
-    color: rgba(0, 0, 0, .38);
+    color: rgba(255, 0, 0, .38);
   }
 
   md-toolbar.md-default-theme:not(.md-menu-toolbar) .md-button[disabled] md-icon,
   md-toolbar:not(.md-menu-toolbar) .md-button[disabled] md-icon {
-    color: rgba(0, 0, 0, .28);
+    color: rgba(255, 0, 0, .28);
   }
 
   span.no-data-found {
@@ -478,7 +478,7 @@ pre.tb-highlight {
 
 .tb-card-description {
   font-size: 13px;
-  color: rgba(0, 0, 0, .54);
+  color: rgba(0, 0, 0, .48);
 
   @include line-clamp(2, 1.1);
 }
@@ -528,7 +528,7 @@ $previewSize: 100px !default;
   font-size: 18px;
   font-weight: 400;
   line-height: 18px;
-  color: rgba(0, 0, 0, .38);
+  color: rgba(0, 0, 0, .26);
   text-transform: uppercase;
 }
 
@@ -546,7 +546,7 @@ $previewSize: 100px !default;
   overflow: hidden;
   font-size: 12px;
   line-height: 14px;
-  color: rgb(221, 44, 0);
+  color: rgb(255, 0, 0);
 }
 
 .tb-error-message.ng-animate {
