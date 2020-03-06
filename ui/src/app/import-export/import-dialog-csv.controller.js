@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2019 The Thingsboard Authors
+ * Copyright © 2016-2020 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ export default function ImportDialogCsvController($scope, $mdDialog, toast, impo
         vm.columnsParam = [];
         var columnParam = {};
         for (var i = 0; i < parseData.headers.length; i++) {
-            if (vm.importParameters.isHeader && parseData.headers[i].search(/^(name|type)$/im) === 0) {
+            if (vm.importParameters.isHeader && parseData.headers[i].search(/^(name|type|label)$/im) === 0) {
                 columnParam = {
                     type: types.importEntityColumnType[parseData.headers[i].toLowerCase()].value,
                     key: parseData.headers[i].toLowerCase(),
@@ -126,6 +126,7 @@ export default function ImportDialogCsvController($scope, $mdDialog, toast, impo
             var entityData = {
                 name: "",
                 type: "",
+                label: "",
                 accessToken: "",
                 attributes: {
                     server: [],
@@ -161,6 +162,9 @@ export default function ImportDialogCsvController($scope, $mdDialog, toast, impo
                         break;
                     case types.importEntityColumnType.type.value:
                         entityData.type = importData.rows[i][j];
+                        break;
+                    case types.importEntityColumnType.label.value:
+                        entityData.label = importData.rows[i][j];
                         break;
                 }
             }

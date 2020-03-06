@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2019 The Thingsboard Authors
+ * Copyright © 2016-2020 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /* eslint-disable import/no-unresolved, import/default */
 
 import tableColumnsAssignment from './table-columns-assignment.tpl.html';
@@ -44,6 +43,7 @@ function TableColumnsAssignmentController($scope, types, $timeout) {
 
     vm.columnTypes.name = types.importEntityColumnType.name;
     vm.columnTypes.type = types.importEntityColumnType.type;
+    vm.columnTypes.label = types.importEntityColumnType.label;
 
     switch (vm.entityType) {
         case types.entityType.device:
@@ -62,6 +62,7 @@ function TableColumnsAssignmentController($scope, types, $timeout) {
         if (newVal) {
             var isSelectName = false;
             var isSelectType = false;
+            var isSelectLabel = false;
             var isSelectCredentials = false;
             for (var i = 0; i < newVal.length; i++) {
                 switch (newVal[i].type) {
@@ -70,6 +71,9 @@ function TableColumnsAssignmentController($scope, types, $timeout) {
                         break;
                     case types.importEntityColumnType.type.value:
                         isSelectType = true;
+                        break;
+                    case types.importEntityColumnType.label.value:
+                        isSelectLabel = true;
                         break;
                     case types.importEntityColumnType.accessToken.value:
                         isSelectCredentials = true;
@@ -84,6 +88,7 @@ function TableColumnsAssignmentController($scope, types, $timeout) {
             $timeout(function () {
                 vm.columnTypes.name.disable = isSelectName;
                 vm.columnTypes.type.disable = isSelectType;
+                vm.columnTypes.label.disable = isSelectLabel;
                 if (angular.isDefined(vm.columnTypes.accessToken)) {
                     vm.columnTypes.accessToken.disable = isSelectCredentials;
                 }

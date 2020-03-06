@@ -271,7 +271,8 @@
         "unassign-assets-text": "Après la confirmation, tous les actifs sélectionnés ne seront pas attribués et ne seront pas accessibles au client.",
         "unassign-assets-title": "Êtes-vous sûr de vouloir retirer l'attribution de {count, plural, 1 {1 asset} other {# assets}}?",
         "unassign-from-customer": "Retirer du client",
-        "view-assets": "Afficher les actifs"
+        "view-assets": "Afficher les actifs",
+        "label": "Label"
     },
     "attribute": {
         "add": "Ajouter un attribut",
@@ -539,8 +540,8 @@
         "set-background": "Définir l'arrière-plan",
         "settings": "Paramètres",
         "show-details": "Afficher les détails",
-        "socialshare-text": "'{{dashboardTitle}}' propulsé par elbstack",
-        "socialshare-title": "'{{dashboardTitle}}' propulsé par elbstack",
+        "socialshare-text": "'{{dashboardTitle}}' propulsé par ROCKNITIVE",
+        "socialshare-title": "'{{dashboardTitle}}' propulsé par ROCKNITIVE",
         "state": "État du tableau de bord",
         "state-controller": "Contrôleur d'état",
         "state-id": "ID d'état",
@@ -807,6 +808,22 @@
         "unable-delete-entity-alias-title": "Impossible de supprimer l'alias d'entité",
         "use-entity-name-filter": "Utiliser un filtre",
         "user-name-starts-with": "Utilisateurs dont les noms commencent par '{{prefix}}'"
+    },
+    "entity-field": {
+        "address": "Adresse",
+        "address2": "Adresse 2",
+        "city": "Ville",
+        "country": "Pays",
+        "created-time": "Heure de création",
+        "email": "Email",
+        "first-name": "Prénom",
+        "last-name": "Nom de famille",
+        "name": "Nom",
+        "phone": "Téléphone",
+        "state": "Prov",
+        "title": "Titre",
+        "type": "Type",
+        "zip": "Code postal"
     },
     "entity-view": {
         "add": "Ajouter une vue d'entité",
@@ -1166,7 +1183,8 @@
             "tr_TR": "Turc",
             "fa_IR": "Persane",
             "uk_UA": "Ukrainien",
-            "cs_CZ": "Tchèque"
+            "cs_CZ": "Tchèque",
+            "el_GR": "Grec"
         }
     },
     "layout": {
