@@ -46,6 +46,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -140,8 +142,19 @@ public class DefaultMailService implements MailService {
 
         String subject = messages.getMessage("activation.subject", null, Locale.US);
 
+        String activationToken = null;
+        Pattern activationTokenPattern = Pattern.compile("\\?activateToken=(.*)");
+        Matcher activationTokenPatternMatcher = activationTokenPattern.matcher(activationLink);
+
+        while(activationTokenPatternMatcher.find()) {
+            activationToken = activationTokenPatternMatcher.group(1);
+            System.out.println("found token: " + activationToken);
+        }
+
+
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("activationLink", activationLink);
+        model.put("activationToken", activationToken);
         model.put(TARGET_EMAIL, email);
 
         String message = mergeTemplateIntoString(this.engine,
