@@ -22,9 +22,9 @@ import mdiIconSet from '../svg/mdi.svg';
 
 /* eslint-enable import/no-unresolved, import/default */
 
-const PRIMARY_BACKGROUND_COLOR = "#305680";//#2856b6";//"#3f51b5";
-const SECONDARY_BACKGROUND_COLOR = "#527dad";
-const HUE3_COLOR = "#a7c1de";
+const PRIMARY_BACKGROUND_COLOR = "#5c6bc0";//"#305680";//"#2856b6";//"#3f51b5";
+const SECONDARY_BACKGROUND_COLOR = "#9fa8da";
+const HUE3_COLOR = "#c5cae9";
 
 /*@ngInject*/
 export default function AppConfig($provide,
@@ -137,12 +137,48 @@ export default function AppConfig($provide,
             .dark();
     }
 
+    function rocknitiveTheme() {
+        var tbPrimaryPalette = $mdThemingProvider.extendPalette('indigo', {
+            '500': PRIMARY_BACKGROUND_COLOR,
+            '600': SECONDARY_BACKGROUND_COLOR,
+            'A100': HUE3_COLOR
+        });
+
+        var tbAccentPalette = $mdThemingProvider.extendPalette('deep-purple');
+
+        $mdThemingProvider.definePalette('tb-primary', tbPrimaryPalette);
+        $mdThemingProvider.definePalette('tb-accent', tbAccentPalette);
+
+        var tbDarkPrimaryPalette = $mdThemingProvider.extendPalette('tb-primary', {
+            '500': '#90caf9'
+        });
+
+        var tbDarkPrimaryBackgroundPalette = $mdThemingProvider.extendPalette('tb-primary', {
+            '800': PRIMARY_BACKGROUND_COLOR
+        });
+
+        $mdThemingProvider.definePalette('tb-dark-primary', tbDarkPrimaryPalette);
+        $mdThemingProvider.definePalette('tb-dark-primary-background', tbDarkPrimaryBackgroundPalette);
+
+        $mdThemingProvider.theme('default')
+          .primaryPalette('tb-primary')
+          .accentPalette('tb-accent');
+
+        $mdThemingProvider.theme('tb-dark')
+          .primaryPalette('tb-dark-primary')
+          .accentPalette('tb-accent')
+          .backgroundPalette('tb-dark-primary-background')
+          .dark();
+    }
+
     function configureTheme() {
 
-        var theme = 'indigo';
+        var theme = 'rocknitiveTheme';
 
         if (theme === 'blueGray') {
             blueGrayTheme();
+        } else if (theme === 'rocknitiveTheme') {
+            rocknitiveTheme();
         } else {
             indigoTheme();
         }

@@ -248,10 +248,10 @@ label {
     }
 
     &.tb-error {
-      color: rgb(221, 44, 0);
+      color: rgb(255, 0, 0);
 
       &.tb-required::after {
-        color: rgb(221, 44, 0);
+        color: rgb(255, 0, 0);
       }
     }
   }
