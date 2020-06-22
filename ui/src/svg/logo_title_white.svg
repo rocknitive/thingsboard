@@ -1,117 +1,117 @@
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   id="svg2"
-   height="320"
-   width="1543.4"
-   version="1.1"
-   viewBox="0 0 1543.4268 320.00026"
-   sodipodi:docname="logo_title_white.svg"
-   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:svg="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        id="svg2"
+        height="320"
+        width="1543.4"
+        version="1.1"
+        viewBox="0 0 1543.4268 320.00026"
+        sodipodi:docname="logo_title_white.svg"
+        inkscape:version="0.92.2 5c3e80d, 2017-08-06">
   <metadata
-     id="metadata14462">
+          id="metadata14462">
     <rdf:RDF>
       <cc:Work
-         rdf:about="">
+              rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs14460">
+          id="defs14460">
     <linearGradient
-       gradientUnits="userSpaceOnUse"
-       x1="72"
-       y1="0"
-       x2="0"
-       y2="72"
-       id="linearGradient-1">
+            gradientUnits="userSpaceOnUse"
+            x1="72"
+            y1="0"
+            x2="0"
+            y2="72"
+            id="linearGradient-1">
       <stop
-         stop-color="#5CFFFF"
-         offset="0%"
-         id="stop2" />
+              stop-color="#5CFFFF"
+              offset="0%"
+              id="stop2" />
       <stop
-         stop-color="#5C5CFF"
-         offset="100%"
-         id="stop4" />
+              stop-color="#5C5CFF"
+              offset="100%"
+              id="stop4" />
     </linearGradient>
   </defs>
   <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1405"
-     inkscape:window-height="996"
-     id="namedview14458"
-     showgrid="false"
-     inkscape:pagecheckerboard="true"
-     inkscape:zoom="0.75502913"
-     inkscape:cx="809.83113"
-     inkscape:cy="371.91235"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg2" />
+          pagecolor="#ffffff"
+          bordercolor="#666666"
+          borderopacity="1"
+          objecttolerance="10"
+          gridtolerance="10"
+          guidetolerance="10"
+          inkscape:pageopacity="0"
+          inkscape:pageshadow="2"
+          inkscape:window-width="1405"
+          inkscape:window-height="996"
+          id="namedview14458"
+          showgrid="false"
+          inkscape:pagecheckerboard="true"
+          inkscape:zoom="0.75502913"
+          inkscape:cx="809.83113"
+          inkscape:cy="371.91235"
+          inkscape:window-x="0"
+          inkscape:window-y="0"
+          inkscape:window-maximized="0"
+          inkscape:current-layer="svg2" />
   <g
-     id="layer1"
-     transform="translate(0 -732.36)">
+          id="layer1"
+          transform="translate(0 -732.36)">
     <g
-       stroke-width="28"
-       id="g14436">
+            stroke-width="28"
+            id="g14436">
       <g
-         id="g5204-0"
-         transform="matrix(-.66287 .69913 -.66371 -.70001 863.46 1410.6)">
+              id="g5204-0"
+              transform="matrix(-.66287 .69913 -.66371 -.70001 863.46 1410.6)">
         <g
-           id="g5175-6"
-           transform="translate(2.5254 3.0305)" />
+                id="g5175-6"
+                transform="translate(2.5254 3.0305)" />
         <g
-           id="g5175-9-8"
-           transform="translate(41.25 -30.543)"
-           stroke-width="28" />
+                id="g5175-9-8"
+                transform="translate(41.25 -30.543)"
+                stroke-width="28" />
       </g>
       <g
-         id="g5175-6-35"
-         transform="matrix(.57657 .52719 -.57729 .52786 584.63 346.6)" />
+              id="g5175-6-35"
+              transform="matrix(.57657 .52719 -.57729 .52786 584.63 346.6)" />
       <g
-         id="g5204-0-5-0"
-         transform="matrix(.66287 -.69913 .66371 .70001 -543.46 380.47)">
+              id="g5204-0-5-0"
+              transform="matrix(.66287 -.69913 .66371 .70001 -543.46 380.47)">
         <g
-           id="g5175-6-35-9"
-           transform="translate(2.5254 3.0305)" />
+                id="g5175-6-35-9"
+                transform="translate(2.5254 3.0305)" />
         <g
-           id="g5175-9-8-2-6"
-           transform="translate(41.25 -30.543)"
-           stroke-width="28" />
+                id="g5175-9-8-2-6"
+                transform="translate(41.25 -30.543)"
+                stroke-width="28" />
       </g>
     </g>
     <g
-       id="text4279"
-       transform="translate(0 732.36)"
-       fill="#305680">
+            id="text4279"
+            transform="translate(0 732.36)"
+            fill="#305680">
       <g
-         id="g9352"
-         fill="#fff">
+              id="g9352"
+              fill="#fff">
         <g
-           id="g8299">
+                id="g8299">
           <text
-             xml:space="preserve"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:140.00244141px;line-height:40.25;font-family:'.SF NS Display Condensed';-inkscape-font-specification:'.SF NS Display Condensed, ';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00001729"
-             x="369.31546"
-             y="212.89735"
-             id="text22792"><tspan
+                  xml:space="preserve"
+                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:140.00244141px;line-height:40.25;font-family:'.SF NS Display Condensed';-inkscape-font-specification:'.SF NS Display Condensed, ';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00001729"
+                  x="369.31546"
+                  y="212.89735"
+                  id="text22792"><tspan
                sodipodi:role="line"
                id="tspan22790"
                x="369.31546"
@@ -125,5 +125,50 @@
       </g>
     </g>
   </g>
- </g>
+  <g
+          id="rocknitive-logo-white-notext"
+          transform="matrix(4.166739,0,0,4.166739,21.520794,11.019459)">
+    <circle
+            style="fill:url(#linearGradient-1);fill-rule:nonzero"
+            id="Oval"
+            cx="36"
+            cy="36"
+            r="36" />
+    <g
+            style="fill:#ffffff"
+            id="Finger1"
+            transform="translate(14,16)">
+      <path
+              inkscape:connector-curvature="0"
+              d="m 4,16 c 2.209139,0 4,1.790861 4,4 V 36 C 8,38.209139 6.209139,40 4,40 1.790861,40 0,38.209139 0,36 V 20 c 0,-2.209139 1.790861,-4 4,-4 z"
+              id="Finger1b" />
+      <path
+              inkscape:connector-curvature="0"
+              d="M 4,0 C 6.209139,0 8,1.790861 8,4 V 20 C 8,22.209139 6.209139,24 4,24 1.790861,24 0,22.209139 0,20 V 4 C 0,1.790861 1.790861,0 4,0 Z"
+              id="Finger1a" />
+    </g>
+    <path
+            style="fill:#ffffff"
+            inkscape:connector-curvature="0"
+            d="m 30,32 c 2.209139,0 4,1.790861 4,4 v 16 c 0,2.209139 -1.790861,4 -4,4 -2.209139,0 -4,-1.790861 -4,-4 V 36 c 0,-2.209139 1.790861,-4 4,-4 z"
+            id="Finger2" />
+    <path
+            style="fill:#ffffff"
+            inkscape:connector-curvature="0"
+            d="m 42,32 c 2.209139,0 4,1.790861 4,4 v 16 c 0,2.209139 -1.790861,4 -4,4 -2.209139,0 -4,-1.790861 -4,-4 V 36 c 0,-2.209139 1.790861,-4 4,-4 z"
+            id="Finger3" />
+    <g
+            style="fill:#ffffff"
+            id="Finger4"
+            transform="translate(50,16)">
+      <path
+              inkscape:connector-curvature="0"
+              d="m 4,16 c 2.209139,0 4,1.790861 4,4 V 36 C 8,38.209139 6.209139,40 4,40 1.790861,40 0,38.209139 0,36 V 20 c 0,-2.209139 1.790861,-4 4,-4 z"
+              id="Finger4b" />
+      <path
+              inkscape:connector-curvature="0"
+              d="M 4,0 C 6.209139,0 8,1.790861 8,4 V 20 C 8,22.209139 6.209139,24 4,24 1.790861,24 0,22.209139 0,20 V 4 C 0,1.790861 1.790861,0 4,0 Z"
+              id="Finger4a" />
+    </g>
+  </g>
 </svg>

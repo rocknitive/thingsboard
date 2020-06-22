@@ -46,6 +46,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -103,33 +105,7 @@ public class DefaultMailService implements MailService {
         javaMailProperties.put(MAIL_PROP + protocol + ".port", jsonConfig.get("smtpPort").asText());
         javaMailProperties.put(MAIL_PROP + protocol + ".timeout", jsonConfig.get("timeout").asText());
         javaMailProperties.put(MAIL_PROP + protocol + ".auth", String.valueOf(StringUtils.isNotEmpty(jsonConfig.get("username").asText())));
-        boolean enableTls = false;
-        if (jsonConfig.has("enableTls")) {
-            if (jsonConfig.get("enableTls").isBoolean() && jsonConfig.get("enableTls").booleanValue()) {
-                enableTls = true;
-            } else if (jsonConfig.get("enableTls").isTextual()) {
-                enableTls = "true".equalsIgnoreCase(jsonConfig.get("enableTls").asText());
-            }
-        }
-        javaMailProperties.put(MAIL_PROP + protocol + ".starttls.enable", enableTls);
-        if (enableTls && jsonConfig.has("tlsVersion") && StringUtils.isNoneEmpty(jsonConfig.get("tlsVersion").asText())) {
-            javaMailProperties.put(MAIL_PROP + protocol + ".ssl.protocols", jsonConfig.get("tlsVersion").asText());
-        }
-
-        boolean enableProxy = jsonConfig.has("enableProxy") && jsonConfig.get("enableProxy").asBoolean();
-
-        if (enableProxy) {
-            javaMailProperties.put(MAIL_PROP + protocol + ".proxy.host", jsonConfig.get("proxyHost").asText());
-            javaMailProperties.put(MAIL_PROP + protocol + ".proxy.port", jsonConfig.get("proxyPort").asText());
-            String proxyUser = jsonConfig.get("proxyUser").asText();
-            if (StringUtils.isNoneEmpty(proxyUser)) {
-                javaMailProperties.put(MAIL_PROP + protocol + ".proxy.user", proxyUser);
-            }
-            String proxyPassword = jsonConfig.get("proxyPassword").asText();
-            if (StringUtils.isNoneEmpty(proxyPassword)) {
-                javaMailProperties.put(MAIL_PROP + protocol + ".proxy.password", proxyPassword);
-            }
-        }
+        javaMailProperties.put(MAIL_PROP + protocol + ".starttls.enable", jsonConfig.has("enableTls") ? jsonConfig.get("enableTls").asText() : "false");
         return javaMailProperties;
     }
 
@@ -166,8 +142,19 @@ public class DefaultMailService implements MailService {
 
         String subject = messages.getMessage("activation.subject", null, Locale.US);
 
+        String activationToken = null;
+        Pattern activationTokenPattern = Pattern.compile("\\?activateToken=(.*)");
+        Matcher activationTokenPatternMatcher = activationTokenPattern.matcher(activationLink);
+
+        while(activationTokenPatternMatcher.find()) {
+            activationToken = activationTokenPatternMatcher.group(1);
+            System.out.println("found token: " + activationToken);
+        }
+
+
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("activationLink", activationLink);
+        model.put("activationToken", activationToken);
         model.put(TARGET_EMAIL, email);
 
         String message = mergeTemplateIntoString(this.engine,
@@ -270,7 +257,7 @@ public class DefaultMailService implements MailService {
     }
 
     private static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
-                                                  String encoding, Map<String, Object> model) throws VelocityException {
+                                                 String encoding, Map<String, Object> model) throws VelocityException {
 
         StringWriter result = new StringWriter();
         mergeTemplate(velocityEngine, templateLocation, encoding, model, result);
@@ -292,7 +279,7 @@ public class DefaultMailService implements MailService {
         } else {
             message = exception.getMessage();
         }
-        log.warn("Unable to send mail: {}", message);
+        // log.warn("Unable to send mail: {}", message);
         return new ThingsboardException(String.format("Unable to send mail: %s", message),
                 ThingsboardErrorCode.GENERAL);
     }
