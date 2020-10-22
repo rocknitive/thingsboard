@@ -16,7 +16,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>[Aqua Free Services] Account-Aktivierung</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <!--[if !mso]><!-->
@@ -158,13 +157,16 @@
         data-body-style="font-size:14px; font-family:arial,helvetica,sans-serif; color:#000000; background-color:#FFFFFF;">
     <div class="webkit">
         <table cellpadding="0" cellspacing="0" border="0" width="100%" class="wrapper" bgcolor="#FFFFFF">
+            <tbody>
             <tr>
                 <td valign="top" bgcolor="#FFFFFF" width="100%">
                     <table width="100%" role="content-container" class="outer" align="center" cellpadding="0"
                            cellspacing="0" border="0">
+                        <tbody>
                         <tr>
                             <td width="100%">
                                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                    <tbody>
                                     <tr>
                                         <td>
                                             <!--[if mso]>
@@ -175,6 +177,7 @@
                                             <![endif]-->
                                             <table width="100%" cellpadding="0" cellspacing="0" border="0"
                                                    style="width:100%; max-width:600px;" align="center">
+                                                <tbody>
                                                 <tr>
                                                     <td role="modules-container"
                                                         style="padding:0px 0px 0px 0px; color:#000000; text-align:left;"
@@ -183,11 +186,13 @@
                                                                data-type="preheader" border="0" cellpadding="0"
                                                                cellspacing="0" width="100%"
                                                                style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
+                                                            <tbody>
                                                             <tr>
                                                                 <td role="module-content">
                                                                     <p>Ihr angeforderter Account wurde aktiviert.</p>
                                                                 </td>
                                                             </tr>
+                                                            </tbody>
                                                         </table>
                                                         <table class="module" role="module" data-type="text" border="0"
                                                                cellpadding="0" cellspacing="0" width="100%"
@@ -264,6 +269,14 @@
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             Your requested account is now available and
                                                                             can be used.<br>
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            NOTE: Please open this e-mail on your
+                                                                            cellphone.
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
                                                                             <br>
                                                                             By clicking on the button you will be taken
                                                                             directly to our app and can start setting up
@@ -291,7 +304,7 @@
                                                                             <td align="center" bgcolor="#0d4b8a"
                                                                                 class="inner-td"
                                                                                 style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                                                                                <a href="https://app-deeplink.aquafree.com/token/$activationToken"
+                                                                                <a href="https://app.aqua-free-services.com/token/$activationToken"
                                                                                    style="background-color:#0d4b8a; border:1px solid #0D4B8A; border-color:#0D4B8A; border-radius:6px; border-width:1px; color:#ffffff; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 18px 12px 18px; text-align:center; text-decoration:none; border-style:solid;"
                                                                                    target="_blank">Activate account
                                                                                     now</a>
@@ -299,6 +312,31 @@
                                                                         </tr>
                                                                         </tbody>
                                                                     </table>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <table class="module" role="module" data-type="text" border="0"
+                                                               cellpadding="0" cellspacing="0" width="100%"
+                                                               style="table-layout: fixed;"
+                                                               data-muid="f20f6dc4-adc0-4fde-a847-d5fb92131243"
+                                                               data-mc-module-version="2019-10-22">
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="padding:18px 0px 18px 0px; line-height:22px; text-align:inherit;"
+                                                                    height="100%" valign="top" bgcolor=""
+                                                                    role="module-content">
+                                                                    <div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            If you have problems and the app does not
+                                                                            open by clicking on the button above, please
+                                                                            copy the following activation code into the
+                                                                            app:
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <em>$activationToken</em></div>
+                                                                        <div></div>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                             </tbody>
@@ -321,6 +359,13 @@
                                                                             <span style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: helvetica, sans-serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial">Your Aqua </span><span
                                                                                 style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: italic; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: times, serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial">free</span><span
                                                                                 style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: helvetica, sans-serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial"> Team</span>
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit; margin-left: 0px">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit; margin-left: 0px">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <span style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: helvetica, sans-serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial">Do you have questions? Please contact support@aqua-free.com</span>
                                                                         </div>
                                                                         <div></div>
                                                                     </div>
@@ -403,8 +448,15 @@
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br></div>
                                                                         <div style="font-family: inherit; text-align: inherit">
+                                                                            <span style="color: #000000; font-family: helvetica, sans-serif; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline">HINWEIS: Bitte öffnen Sie diese E-Mail auf Ihrem Handy.</span>&nbsp;
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
                                                                             <span style="font-family: helvetica, sans-serif">Mit einem Klick auf den Button gelangen Sie direkt in unsere App und können mit der Einrichtung des Zugang beginnen.</span>
                                                                         </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <br></div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -427,14 +479,39 @@
                                                                             <td align="center" bgcolor="#0d4b8a"
                                                                                 class="inner-td"
                                                                                 style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                                                                                <a href="https://hygenius.aqua-free.com/token/$activationToken"
+                                                                                <a href="https://app.aqua-free-services.com/token/$activationToken"
                                                                                    style="background-color:#0d4b8a; border:1px solid #0D4B8A; border-color:#0D4B8A; border-radius:6px; border-width:1px; color:#ffffff; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 18px 12px 18px; text-align:center; text-decoration:none; border-style:solid;"
                                                                                    target="_blank">Account jetzt
-                                                                                    aktivieren</a>
+                                                                                    aktiviern</a>
                                                                             </td>
                                                                         </tr>
                                                                         </tbody>
                                                                     </table>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <table class="module" role="module" data-type="text" border="0"
+                                                               cellpadding="0" cellspacing="0" width="100%"
+                                                               style="table-layout: fixed;"
+                                                               data-muid="59ce237b-56c2-4ab3-86bf-f195d251ecaa"
+                                                               data-mc-module-version="2019-10-22">
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="padding:18px 0px 18px 0px; line-height:22px; text-align:inherit;"
+                                                                    height="100%" valign="top" bgcolor=""
+                                                                    role="module-content">
+                                                                    <div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            Sollten Sie Probleme haben und die App
+                                                                            öffnet sich nicht bei einem Klick auf den
+                                                                            oben stehenden Button, kopieren Sie bitten
+                                                                            folgenden Aktivierungscode in die App:
+                                                                        </div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <em>$activationToken</em></div>
+                                                                        <div></div>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                             </tbody>
@@ -460,6 +537,13 @@
                                                                                 style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: italic; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: times, serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial">free</span><span
                                                                                 style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: helvetica, sans-serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial"> Team</span>
                                                                         </div>
+                                                                        <div style="font-family: inherit; text-align: inherit; margin-left: 0px">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <br></div>
+                                                                        <div style="font-family: inherit; text-align: inherit">
+                                                                            <span style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-style: inherit; font-variant-ligatures: inherit; font-variant-caps: inherit; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: helvetica, sans-serif; font-size: 14px; vertical-align: baseline; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: initial; border-right-style: initial; border-bottom-style: initial; border-left-style: initial; border-top-color: initial; border-right-color: initial; border-bottom-color: initial; border-left-color: initial; border-image-source: initial; border-image-slice: initial; border-image-width: initial; border-image-outset: initial; border-image-repeat: initial; color: #000000; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial">Fragen? Kontaktiere support@aqua-free.com</span>
+                                                                        </div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -468,6 +552,7 @@
                                                         </table>
                                                     </td>
                                                 </tr>
+                                                </tbody>
                                             </table>
                                             <!--[if mso]>
                                             </td>
@@ -477,17 +562,17 @@
                                             <![endif]-->
                                         </td>
                                     </tr>
+                                    </tbody>
                                 </table>
                             </td>
                         </tr>
+                        </tbody>
                     </table>
                 </td>
             </tr>
+            </tbody>
         </table>
     </div>
 </center>
-<img src="https://u15965357.ct.sendgrid.net/wf/open?upn=yvssYRA417ELi-2F1AphV4SglZnFhw99GVSPwqYQe2jw7I39m19QD66-2F038XJuf3-2FZBhxiQoceHIcHc-2BdVSJSg1CX3vJRjNAkD5MDQS1BwUFG2J8y-2B1ZwjzeQ3cxw7wiKTNkjQ3URNPH4O0WLihrr43NWZbXSbGca-2BFTZ3ZUhkwT0q1WNpuEQ-2BenkXPkNrPzciWB1OoVDzAVKUkJKRtpdy9s15XDFdO70oeaIjNyCefCLub7JeFNrkSDzaYnI-2F5q9OqGiQfORKEmc-2B1ozfvxwttEi5gCnsc9nOKHqnYKeM-2BPDKjM7SI6fBJXVGRgyka5fqbfbflNOFEoOrjQY9BE01DselcsSX0N-2FiAllWFWADV1-2FzQH95AErQB6gP-2Bjl2U1-2BD181wIwGt1PJtq1WOAZsWHQtFvycNGNoIa5ZB7IVrRKJrWDaz83zyfCvz0SSdwFgsp11vYmt3D1-2BppIcru5eFwHrfcorGCccWEgMq19a9R46miSHpCQIe8lLTlcmGoUzobehS7CwkVq61ByT1K2qbHDI4u2CGiD3Mre4aihPlnkQ-3D"
-     alt="" width="1" height="1" border="0"
-     style="height:1px !important;width:1px !important;border-width:0 !important;margin-top:0 !important;margin-bottom:0 !important;margin-right:0 !important;margin-left:0 !important;padding-top:0 !important;padding-bottom:0 !important;padding-right:0 !important;padding-left:0 !important;"/>
 </body>
 </html>
