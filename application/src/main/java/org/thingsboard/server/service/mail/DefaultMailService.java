@@ -183,8 +183,11 @@ public class DefaultMailService implements MailService {
 
         String subject = messages.getMessage("reset.password.subject", null, Locale.US);
 
+        String currentResetPasswordToken = passwordResetLink.split("=")[1];
+
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("passwordResetLink", passwordResetLink);
+        model.put("passwordResetToken", currentResetPasswordToken);
         model.put(TARGET_EMAIL, email);
 
         String message = mergeTemplateIntoString(this.engine,
