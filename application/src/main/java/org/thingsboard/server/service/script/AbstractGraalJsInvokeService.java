@@ -1,4 +1,4 @@
-/**
+package org.thingsboard.server.service.script; /**
  * Copyright © 2016-2020 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.service.script;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import delight.nashornsandbox.NashornSandbox;
-import delight.nashornsandbox.NashornSandboxes;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import delight.graaljssandbox.GraalSandbox;
+import delight.graaljssandbox.GraalSandboxes;
+
+import javax.script.*;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.thingsboard.server.queue.usagestats.TbApiUsageClient;
 import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
+import org.thingsboard.server.service.script.AbstractJsInvokeService;
+import org.thingsboard.server.service.script.JsExecutorService;
+import org.thingsboard.server.service.script.JsStatCallback;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -42,9 +43,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-public abstract class AbstractNashornJsInvokeService extends AbstractJsInvokeService {
+public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeService {
 
-    private NashornSandbox sandbox;
+    private GraalSandbox sandbox;
     private ScriptEngine engine;
     private ExecutorService monitorExecutorService;
 
@@ -65,7 +66,7 @@ public abstract class AbstractNashornJsInvokeService extends AbstractJsInvokeSer
     @Value("${js.local.stats.enabled:false}")
     private boolean statsEnabled;
 
-    public AbstractNashornJsInvokeService(TbApiUsageStateService apiUsageStateService, TbApiUsageClient apiUsageClient, JsExecutorService jsExecutor) {
+    public AbstractGraalJsInvokeService(TbApiUsageStateService apiUsageStateService, TbApiUsageClient apiUsageClient, JsExecutorService jsExecutor) {
         super(apiUsageStateService, apiUsageClient);
         this.jsExecutor = jsExecutor;
     }
@@ -79,7 +80,7 @@ public abstract class AbstractNashornJsInvokeService extends AbstractJsInvokeSer
             int failed = jsFailedMsgs.getAndSet(0);
             int timedOut = jsTimeoutMsgs.getAndSet(0);
             if (pushedMsgs > 0 || invokeMsgs > 0 || evalMsgs > 0 || failed > 0 || timedOut > 0) {
-                log.info("Nashorn JS Invoke Stats: pushed [{}] received [{}] invoke [{}] eval [{}] failed [{}] timedOut [{}]",
+                log.info("Graal JS Invoke Stats: pushed [{}] received [{}] invoke [{}] eval [{}] failed [{}] timedOut [{}]",
                         pushedMsgs, invokeMsgs + evalMsgs, invokeMsgs, evalMsgs, failed, timedOut);
             }
         }
@@ -88,8 +89,9 @@ public abstract class AbstractNashornJsInvokeService extends AbstractJsInvokeSer
     @PostConstruct
     public void init() {
         super.init(maxRequestsTimeout);
+        System.setProperty("polyglot.js.nashorn-compat", "true");
         if (useJsSandbox()) {
-            sandbox = NashornSandboxes.create();
+            sandbox = GraalSandboxes.create();
             monitorExecutorService = Executors.newWorkStealingPool(getMonitorThreadPoolSize());
             sandbox.setExecutor(monitorExecutorService);
             sandbox.setMaxCPUTime(getMaxCpuTime());
@@ -97,8 +99,10 @@ public abstract class AbstractNashornJsInvokeService extends AbstractJsInvokeSer
             sandbox.allowLoadFunctions(true);
             sandbox.setMaxPreparedStatements(30);
         } else {
-            NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-            engine = factory.getScriptEngine(new String[]{"--no-java"});
+            engine = new ScriptEngineManager().getEngineByName("JavaScript");
+            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            bindings.put("polyglot.js.ecmascript-version", "2021");
+            bindings.put("polyglot.js.intl-402", true);
         }
     }
 

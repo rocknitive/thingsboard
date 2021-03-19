@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @ConditionalOnProperty(prefix = "js", value = "evaluator", havingValue = "local", matchIfMissing = true)
 @Service
-public class NashornJsInvokeService extends AbstractNashornJsInvokeService {
+public class GraalJsInvokeService extends AbstractGraalJsInvokeService {
 
     @Value("${js.local.use_js_sandbox}")
     private boolean useJsSandbox;
@@ -44,7 +44,7 @@ public class NashornJsInvokeService extends AbstractNashornJsInvokeService {
     @Value("${js.local.max_black_list_duration_sec:60}")
     private int maxBlackListDurationSec;
 
-    public NashornJsInvokeService(TbApiUsageStateService apiUsageStateService, TbApiUsageClient apiUsageClient, JsExecutorService jsExecutor) {
+    public GraalJsInvokeService(TbApiUsageStateService apiUsageStateService, TbApiUsageClient apiUsageClient, JsExecutorService jsExecutor) {
         super(apiUsageStateService, apiUsageClient, jsExecutor);
     }
 
