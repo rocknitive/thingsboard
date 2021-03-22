@@ -91,6 +91,8 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
     public void init() {
         super.init(maxRequestsTimeout);
         System.setProperty("polyglot.js.nashorn-compat", "true");
+//        System.setProperty("polyglot.js.ecmascript-version", "2020");
+        System.setProperty("polyglot.js.intl-402", "true");
         if (useJsSandbox()) {
             sandbox = GraalSandboxes.create();
             monitorExecutorService = Executors.newWorkStealingPool(getMonitorThreadPoolSize());
@@ -101,9 +103,9 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
             sandbox.setMaxPreparedStatements(30);
         } else {
             engine = new ScriptEngineManager().getEngineByName("graal.js");
-            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-            bindings.put("polyglot.js.ecmascript-version", "2021");
-            bindings.put("polyglot.js.intl-402", true);
+//            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+//            bindings.put("polyglot.js.ecmascript-version", "2021");
+//            bindings.put("polyglot.js.intl-402", true);
         }
     }
 
