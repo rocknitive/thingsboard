@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.script; /**
+/**
  * Copyright © 2016-2020 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@ package org.thingsboard.server.service.script; /**
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.thingsboard.server.service.script;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -20,20 +21,21 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import delight.graaljssandbox.*;
 
-import javax.script.*;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.thingsboard.server.queue.usagestats.TbApiUsageClient;
 import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
-import org.thingsboard.server.service.script.AbstractJsInvokeService;
-import org.thingsboard.server.service.script.JsExecutorService;
-import org.thingsboard.server.service.script.JsStatCallback;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+import javax.script.ScriptEngineManager;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -98,7 +100,7 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
             sandbox.allowLoadFunctions(true);
             sandbox.setMaxPreparedStatements(30);
         } else {
-            engine = new ScriptEngineManager().getEngineByName("JavaScript");
+            engine = new ScriptEngineManager().getEngineByName("graal.js");
             Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
             bindings.put("polyglot.js.ecmascript-version", "2021");
             bindings.put("polyglot.js.intl-402", true);

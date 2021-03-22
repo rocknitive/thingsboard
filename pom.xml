@@ -93,7 +93,7 @@
         <elasticsearch.version>5.0.2</elasticsearch.version>
 <!--        <delight-nashorn-sandbox.version>0.1.14</delight-nashorn-sandbox.version>-->
         <delight-graaljs-sandbox.version>0.1.2</delight-graaljs-sandbox.version>
-<!--        <graalvm-js.version>20.3.0</graalvm-js.version>-->
+        <graalvm-js.version>20.3.0</graalvm-js.version>
         <kafka.version>2.3.0</kafka.version>
         <bucket4j.version>4.1.1</bucket4j.version>
         <fst.version>2.57</fst.version>
@@ -1293,16 +1293,16 @@
                 <artifactId>delight-graaljs-sandbox</artifactId>
                 <version>${delight-graaljs-sandbox.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.graalvm.js</groupId>-->
-<!--                <artifactId>js</artifactId>-->
-<!--                <version>${graalvm-js.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.graalvm.js</groupId>-->
-<!--                <artifactId>js-scriptengine</artifactId>-->
-<!--                <version>${graalvm-js.version}</version>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm-js.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm-js.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.vladimir-bukhtoyarov</groupId>
                 <artifactId>bucket4j-core</artifactId>
