@@ -18,8 +18,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import delight.graaljssandbox.GraalSandbox;
-import delight.graaljssandbox.GraalSandboxes;
+import delight.graaljssandbox.*;
 
 import javax.script.*;
 
