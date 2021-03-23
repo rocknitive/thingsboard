@@ -103,7 +103,7 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
             sandbox.setMaxPreparedStatements(30);
         } else {
             engine = new ScriptEngineManager().getEngineByName("graal.js");
-//            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            Bindings bindings = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
 //            bindings.put("polyglot.js.ecmascript-version", "2021");
 //            bindings.put("polyglot.js.intl-402", true);
         }
