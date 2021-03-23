@@ -94,7 +94,13 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
 //        System.setProperty("polyglot.js.ecmascript-version", "2020");
         System.setProperty("polyglot.js.intl-402", "true");
         if (useJsSandbox()) {
-            sandbox = GraalSandboxes.create();
+             /*
+            This cannot be used currently, because of:
+            Can't compile script: java.lang.RuntimeException: java.lang.IllegalArgumentException: The value 'DynamicObject@1be8a0c2' cannot be passed from one context to another. The current context is 0x5e9f5606 and the argument value originates from context 0x4d703b51.
+            */
+            String[] params = new String[] { "polyglot.js.intl-402=true", "polyglot.js.nashorn-compat=true"};
+
+            sandbox = GraalSandboxes.create(params);
             monitorExecutorService = Executors.newWorkStealingPool(getMonitorThreadPoolSize());
             sandbox.setExecutor(monitorExecutorService);
             sandbox.setMaxCPUTime(getMaxCpuTime());
@@ -103,7 +109,7 @@ public abstract class AbstractGraalJsInvokeService extends AbstractJsInvokeServi
             sandbox.setMaxPreparedStatements(30);
         } else {
             engine = new ScriptEngineManager().getEngineByName("graal.js");
-            Bindings bindings = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+//            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 //            bindings.put("polyglot.js.ecmascript-version", "2021");
 //            bindings.put("polyglot.js.intl-402", true);
         }
