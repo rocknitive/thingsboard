@@ -2,9 +2,9 @@ name: Build
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ release-* ]
   push:
-    branches: [ master ]
+    branches: [ release-* ]
     tags:
       - "v*"
 
