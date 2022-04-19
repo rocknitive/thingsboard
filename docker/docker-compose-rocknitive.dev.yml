@@ -1,0 +1,27 @@
+version: '2.2'
+
+services:
+  # add local postgres instance
+  postgres:
+    restart: always
+    image: "postgres:12"
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_DB: thingsboard
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./tb-node/postgres:/var/lib/postgresql/data
+  # add dependencies on postgres container
+  tb-core1:
+    depends_on:
+      - postgres
+  tb-rule-engine1:
+    depends_on:
+      - postgres
+  # enable remote debugging for coap transport
+  tb-coap-transport:
+    ports:
+      - '5005:5005'
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
