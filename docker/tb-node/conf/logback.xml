@@ -40,10 +40,10 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="org.thingsboard.server" level="WARN" />
     <logger name="com.google.common.util.concurrent.AggregateFuture" level="OFF" />
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="fileLogAppender"/>
         <appender-ref ref="STDOUT"/>
     </root>
