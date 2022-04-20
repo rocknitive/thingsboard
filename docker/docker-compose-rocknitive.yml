@@ -94,22 +94,22 @@ services:
       - redis
       - tb-js-executor
       - kafka
-#  tb-mqtt-transport1:
-#    restart: always
-#    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
-#    ports:
-#      - "1883"
-#    environment:
-#      TB_SERVICE_ID: tb-mqtt-transport1
-#    env_file:
-#      - tb-mqtt-transport.env
-#      - queue-kafka.env
-#    volumes:
-#      - ./tb-transports/mqtt/conf:/config
-#      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
-#    depends_on:
-#      - zookeeper
-#      - kafka
+  tb-mqtt-transport1:
+    restart: always
+    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      - "1883"
+    environment:
+      TB_SERVICE_ID: tb-mqtt-transport1
+    env_file:
+      - rocknitive-tb-mqtt-transport.env
+      - queue-kafka.env
+    volumes:
+      - ./tb-transports/mqtt/conf:/config
+      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
+    depends_on:
+      - zookeeper
+      - kafka
   tb-http-transport1:
     restart: always
     image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
