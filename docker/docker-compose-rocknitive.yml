@@ -114,7 +114,7 @@ services:
     restart: always
     image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
     ports:
-      - "8081"
+      - "8081:8081"
     environment:
       TB_SERVICE_ID: tb-http-transport1
     env_file:
@@ -164,7 +164,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - tb-web-ui.env
+      - rocknitive-tb-web-ui.env
 #  haproxy:
 #    restart: always
 #    container_name: "${LOAD_BALANCER_NAME}"
