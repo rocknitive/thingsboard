@@ -36,7 +36,7 @@ services:
     image: "${DOCKER_REPO}/${JS_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
     scale: 5
     env_file:
-      - tb-js-executor.env
+      - rocknitive-tb-js-executor.env
       - queue-kafka.env
     depends_on:
       - kafka
@@ -56,7 +56,7 @@ services:
       TB_SERVICE_TYPE: tb-core
       EDGES_ENABLED: "true"
     env_file:
-      - tb-node.env
+      - rocknitive-tb-node.env
       - rocknitive-tb-node.postgres.env
       - queue-kafka.env
     volumes:
@@ -68,6 +68,7 @@ services:
       - tb-js-executor
       - tb-rule-engine1
       - kafka
+      #- postgres #only for dev
   tb-rule-engine1:
     restart: always
     image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
@@ -82,7 +83,7 @@ services:
       TB_SERVICE_ID: tb-rule-engine1
       TB_SERVICE_TYPE: tb-rule-engine
     env_file:
-      - tb-node.env
+      - rocknitive-tb-node.env
       - rocknitive-tb-node.postgres.env
       - queue-kafka.env
     volumes:
@@ -93,22 +94,22 @@ services:
       - redis
       - tb-js-executor
       - kafka
-  tb-mqtt-transport1:
-    restart: always
-    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
-    ports:
-      - "1883"
-    environment:
-      TB_SERVICE_ID: tb-mqtt-transport1
-    env_file:
-      - tb-mqtt-transport.env
-      - queue-kafka.env
-    volumes:
-      - ./tb-transports/mqtt/conf:/config
-      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
-    depends_on:
-      - zookeeper
-      - kafka
+#  tb-mqtt-transport1:
+#    restart: always
+#    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+#    ports:
+#      - "1883"
+#    environment:
+#      TB_SERVICE_ID: tb-mqtt-transport1
+#    env_file:
+#      - tb-mqtt-transport.env
+#      - queue-kafka.env
+#    volumes:
+#      - ./tb-transports/mqtt/conf:/config
+#      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
+#    depends_on:
+#      - zookeeper
+#      - kafka
   tb-http-transport1:
     restart: always
     image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
@@ -117,7 +118,7 @@ services:
     environment:
       TB_SERVICE_ID: tb-http-transport1
     env_file:
-      - tb-http-transport.env
+      - rocknitive-tb-http-transport.env
       - queue-kafka.env
     volumes:
       - ./tb-transports/http/conf:/config
@@ -133,7 +134,7 @@ services:
     environment:
       TB_SERVICE_ID: tb-coap-transport
     env_file:
-      - tb-coap-transport.env
+      - rocknitive-tb-coap-transport.env
       - queue-kafka.env
     volumes:
       - ./tb-transports/coap/conf:/config
@@ -185,7 +186,7 @@ services:
       HTTPS_PORT: 443
       MQTT_PORT: 1883
       EDGES_RPC_PORT: 7070
-      FORCE_HTTPS_REDIRECT: "false"
+      FORCE_HTTPS_REDIRECT: "true"
     links:
         - tb-core1
         - tb-web-ui1
@@ -200,3 +201,14 @@ services:
       - kafka.env
     depends_on:
       - zookeeper
+  # only for dev
+#  postgres:
+#    restart: always
+#    image: "postgres:12"
+#    ports:
+#      - "5432"
+#    environment:
+#      POSTGRES_DB: thingsboard
+#      POSTGRES_PASSWORD: postgres
+#    volumes:
+#      - ./tb-node/postgres:/var/lib/postgresql/data

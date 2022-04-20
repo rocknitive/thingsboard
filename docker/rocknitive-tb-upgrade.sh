@@ -40,4 +40,6 @@ set -e
 
 docker-compose -f docker-compose-rocknitive.yml pull tb-core1
 docker-compose -f docker-compose-rocknitive.yml up -d redis
+# only for dev
+#docker-compose -f docker-compose-rocknitive.yml up -d postgres
 docker-compose -f docker-compose-rocknitive.yml run --no-deps --rm -e UPGRADE_TB=true -e FROM_VERSION=${fromVersion} tb-core1

@@ -43,7 +43,7 @@
     <logger name="org.thingsboard.server" level="INFO" />
     <logger name="com.google.common.util.concurrent.AggregateFuture" level="OFF" />
 
-    <root level="INFO">
+    <root level="WARNING">
         <appender-ref ref="fileLogAppender"/>
         <appender-ref ref="STDOUT"/>
     </root>

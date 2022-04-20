@@ -40,4 +40,6 @@ fi
 set -e
 
 docker-compose -f docker-compose-rocknitive.yml up -d redis
+# only for dev
+#docker-compose -f docker-compose-rocknitive.yml up -d postgres
 docker-compose -f docker-compose-rocknitive.yml run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} tb-core1
