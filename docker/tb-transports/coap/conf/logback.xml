@@ -40,9 +40,9 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="org.thingsboard.server" level="WARN" />
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="fileLogAppender"/>
         <appender-ref ref="STDOUT"/>
     </root>
