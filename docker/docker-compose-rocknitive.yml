@@ -47,7 +47,7 @@ services:
       - "8080"
       - "7070"
     logging:
-      driver: "json-file"
+      driver: "local"
       options:
         max-size: "200m"
         max-file: "30"
@@ -75,7 +75,7 @@ services:
     ports:
       - "8080"
     logging:
-      driver: "json-file"
+      driver: "local"
       options:
         max-size: "200m"
         max-file: "30"
