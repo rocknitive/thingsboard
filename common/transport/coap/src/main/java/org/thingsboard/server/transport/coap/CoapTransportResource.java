@@ -278,7 +278,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostAttributes(sessionId, request,
                 clientState.getConfiguration().getAttributesMsgDescriptor()),
-                new CoapOkCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
+                new CoapOkCallback(exchange, CoAP.ResponseCode.VALID, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     private void handlePostTelemetryRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
@@ -286,7 +286,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostTelemetry(sessionId, request,
                 clientState.getConfiguration().getTelemetryMsgDescriptor()),
-                new CoapOkCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
+                new CoapOkCallback(exchange, CoAP.ResponseCode.VALID, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     private void handleClaimRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
@@ -427,7 +427,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
 
         @Override
         public void onSuccess(TransportProtos.ProvisionDeviceResponseMsg msg) {
-            CoAP.ResponseCode responseCode = CoAP.ResponseCode.CREATED;
+            CoAP.ResponseCode responseCode = CoAP.ResponseCode.CONTENT;
             if (!msg.getStatus().equals(TransportProtos.ResponseStatus.SUCCESS)) {
                 responseCode = CoAP.ResponseCode.BAD_REQUEST;
             }
