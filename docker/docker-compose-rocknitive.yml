@@ -68,7 +68,6 @@ services:
       - tb-js-executor
       - tb-rule-engine1
       - kafka
-      #- postgres #only for dev
   tb-rule-engine1:
     restart: always
     image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
@@ -150,7 +149,7 @@ services:
     environment:
       TB_SERVICE_ID: tb-lwm2m-transport
     env_file:
-      - tb-lwm2m-transport.env
+      - rocknitive-tb-lwm2m-transport.env
       - queue-kafka.env
     volumes:
       - ./tb-transports/lwm2m/conf:/config
@@ -201,14 +200,3 @@ services:
       - kafka.env
     depends_on:
       - zookeeper
-  # only for dev
-#  postgres:
-#    restart: always
-#    image: "postgres:12"
-#    ports:
-#      - "5432"
-#    environment:
-#      POSTGRES_DB: thingsboard
-#      POSTGRES_PASSWORD: postgres
-#    volumes:
-#      - ./tb-node/postgres:/var/lib/postgresql/data
