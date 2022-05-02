@@ -34,6 +34,7 @@ import org.thingsboard.server.gen.transport.TransportProtos;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ProtoConverter {
@@ -102,6 +103,28 @@ public class ProtoConverter {
         if (!StringUtils.isEmpty(sharedKeys)) {
             List<String> sharedKeysList = Arrays.asList(sharedKeys.split(","));
             result.addAllSharedAttributeNames(sharedKeysList);
+        }
+        return result.build();
+    }
+
+    /**
+     * Drop timestamps from get attributes response.
+     */
+    public static TransportApiProtos.AttributesResponse convertToAttributesResponse(TransportProtos.GetAttributeResponseMsg msg) throws RuntimeException {
+        TransportApiProtos.AttributesResponse.Builder result = TransportApiProtos.AttributesResponse.newBuilder();
+        if (msg.getClientAttributeListCount() > 0) {
+            result.addAllClientAttributeList(msg
+                .getClientAttributeListList()
+                .stream()
+                .map(TransportProtos.TsKvProto::getKv)
+                .collect(Collectors.toList()));
+        }
+        if (msg.getSharedAttributeListCount() > 0) {
+            result.addAllSharedAttributeList(msg
+                .getSharedAttributeListList()
+                .stream()
+                .map(TransportProtos.TsKvProto::getKv)
+                .collect(Collectors.toList()));
         }
         return result.build();
     }
