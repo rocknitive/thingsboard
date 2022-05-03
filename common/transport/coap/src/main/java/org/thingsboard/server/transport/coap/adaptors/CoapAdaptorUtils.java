@@ -31,8 +31,8 @@ public class CoapAdaptorUtils {
         List<String> queryElements = inbound.getOptions().getUriQuery();
         TransportProtos.GetAttributeRequestMsg.Builder result = TransportProtos.GetAttributeRequestMsg.newBuilder();
         if (queryElements != null && queryElements.size() > 0) {
-            Set<String> clientKeys = toKeys(queryElements, "clientKeys");
-            Set<String> sharedKeys = toKeys(queryElements, "sharedKeys");
+            Set<String> clientKeys = toKeys(queryElements, "clientKeys", "c");
+            Set<String> sharedKeys = toKeys(queryElements, "sharedKeys", "s");
             if (clientKeys != null) {
                 result.addAllClientAttributeNames(clientKeys);
             }
@@ -44,15 +44,19 @@ public class CoapAdaptorUtils {
         return result.build();
     }
 
-    private static Set<String> toKeys(List<String> queryElements, String attributeName) throws AdaptorException {
+    private static Set<String> toKeys(List<String> queryElements, String ...attributeNames) throws AdaptorException {
         String keys = null;
         for (String queryElement : queryElements) {
-            String[] queryItem = queryElement.split("=");
-            if (queryItem.length == 2 && queryItem[0].equals(attributeName)) {
-                keys = queryItem[1];
+            String[] queryItem = queryElement.split("=", 2);
+            if (Arrays.asList(attributeNames).contains(queryItem[0])) {
+                if (queryItem.length == 2 && !StringUtils.isEmpty(queryItem[1])) {
+                    keys = queryItem[1];
+                } else {
+                    keys = "*";
+                }
             }
         }
-        if (keys != null && !StringUtils.isEmpty(keys)) {
+        if (keys != null) {
             return new HashSet<>(Arrays.asList(keys.split(",")));
         } else {
             return null;
