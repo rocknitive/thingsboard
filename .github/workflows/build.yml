@@ -8,11 +8,17 @@ on:
     tags:
       - "v*"
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v2
       
@@ -24,12 +30,45 @@ jobs:
       
       - name: Build with Maven
         working-directory: ${{github.workspace}}
-        run: |
-          mvn package --batch-mode --update-snapshots -DskipTests -Dlicense.skip --file pom.xml
+        run: mvn package --batch-mode --update-snapshots -DskipTests -Dlicense.skip --file pom.xml
 
       - name: Create release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: |
-            ${{github.workspace}}/application/target/thingsboard.deb
+          files: ${{github.workspace}}/application/target/thingsboard.deb
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{env.REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Extract metadata for Docker image tb-node
+        id: meta_tb_node
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{env.REGISTRY}}/${{github.repository_owner}}/tb-node
+
+      - name: Build and push Docker image tb-node
+        uses: docker/build-push-action@v3
+        with:
+          context: ./msa/tb-node/target
+          push: ${{startsWith(github.ref, 'refs/tags/')}}
+          tags: ${{steps.meta_tb_node.outputs.tags}}
+          labels: ${{steps.meta_tb_node.outputs.labels}}
+          
+      - name: Extract metadata for Docker image tb-coap-transport
+        id: meta_tb_coap_transport
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{env.REGISTRY}}/${{github.repository_owner}}/tb-coap-transport
+
+      - name: Build and push Docker image tb-coap-transport
+        uses: docker/build-push-action@v3
+        with:
+          context: ./msa/transport/coap/target
+          push: ${{startsWith(github.ref, 'refs/tags/')}}
+          tags: ${{steps.meta_tb_coap_transport.outputs.tags}}
+          labels: ${{steps.meta_tb_coap_transport.outputs.labels}}
