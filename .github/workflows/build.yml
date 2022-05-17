@@ -49,7 +49,7 @@ jobs:
         id: meta_tb_node
         uses: docker/metadata-action@v4
         with:
-          images: ${{env.REGISTRY}}/tb-node
+          images: ${{env.REGISTRY}}/${{github.repository_owner}}/tb-node
 
       - name: Build and push Docker image tb-node
         uses: docker/build-push-action@v3
@@ -63,7 +63,7 @@ jobs:
         id: meta_tb_coap_transport
         uses: docker/metadata-action@v4
         with:
-          images: ${{env.REGISTRY}}/tb-coap-transport
+          images: ${{env.REGISTRY}}/${{github.repository_owner}}/tb-coap-transport
 
       - name: Build and push Docker image tb-coap-transport
         uses: docker/build-push-action@v3
