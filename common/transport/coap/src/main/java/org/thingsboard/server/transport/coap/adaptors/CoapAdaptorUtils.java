@@ -60,7 +60,7 @@ public class CoapAdaptorUtils {
         return result.build();
     }
 
-    private static Set<String> toKeys(List<String> queryElements, String ...attributeNames) throws AdaptorException {
+    private static Set<String> toKeys(List<String> queryElements, String ...attributeNames) {
         String keys = null;
         for (String queryElement : queryElements) {
             String[] queryItem = queryElement.split("=", 2);

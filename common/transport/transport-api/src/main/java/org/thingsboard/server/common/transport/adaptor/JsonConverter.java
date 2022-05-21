@@ -172,25 +172,15 @@ public class JsonConverter {
         return ts == 0 ? systemTs : ts;
     }
 
-    private static void parseObject(PostTelemetryMsg.Builder builder, long systemTs, JsonObject jo) {
+    private static void parseObject(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
+        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(builder, systemTs, jo);
+            builder.setTs(getTs(systemTs, jo.get("ts")));
+            builder.addAllKv(parseProtoValues(jo.get("values").getAsJsonObject()));
         } else {
-            parseWithoutTs(builder, systemTs, jo);
+            builder.setTs(systemTs);
+            builder.addAllKv(parseProtoValues(jo));
         }
-    }
-
-    private static void parseWithoutTs(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
-        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
-        builder.setTs(systemTs);
-        builder.addAllKv(parseProtoValues(jo));
-        request.addTsKvList(builder.build());
-    }
-
-    private static void parseWithTs(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
-        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
-        builder.setTs(getTs(systemTs, jo.get("ts")));
-        builder.addAllKv(parseProtoValues(jo.get("values").getAsJsonObject()));
         request.addTsKvList(builder.build());
     }
 
@@ -558,23 +548,16 @@ public class JsonConverter {
 
 
     private static void parseObject(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
+        long ts;
+        JsonObject values;
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(result, systemTs, jo);
+            ts = getTs(systemTs, jo.get("ts"));
+            values = jo.get("values").getAsJsonObject();
         } else {
-            parseWithoutTs(result, systemTs, jo);
+            ts = systemTs;
+            values = jo;
         }
-    }
-
-    private static void parseWithoutTs(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
-        for (KvEntry entry : parseValues(jo)) {
-            result.computeIfAbsent(systemTs, tmp -> new ArrayList<>()).add(entry);
-        }
-    }
-
-    public static void parseWithTs(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
-        long ts = getTs(systemTs, jo.get("ts"));
-        JsonObject valuesObject = jo.get("values").getAsJsonObject();
-        for (KvEntry entry : parseValues(valuesObject)) {
+        for (KvEntry entry : parseValues(values)) {
             result.computeIfAbsent(ts, tmp -> new ArrayList<>()).add(entry);
         }
     }
