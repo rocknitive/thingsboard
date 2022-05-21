@@ -46,7 +46,8 @@ public class ProtoCoapAdaptor implements CoapTransportAdaptor {
     public TransportProtos.PostTelemetryMsg convertToPostTelemetry(UUID sessionId, Request inbound, Descriptors.Descriptor telemetryMsgDescriptor) throws AdaptorException {
         ProtoConverter.validateDescriptor(telemetryMsgDescriptor);
         try {
-            return JsonConverter.convertToTelemetryProto(new JsonParser().parse(ProtoConverter.dynamicMsgToJson(inbound.getPayload(), telemetryMsgDescriptor)));
+            var jsonMessage = new JsonParser().parse(ProtoConverter.dynamicMsgToJson(inbound.getPayload(), telemetryMsgDescriptor));
+            return JsonConverter.convertToTelemetryProto(CoapAdaptorUtils.convertProtoJsonTelemetry(jsonMessage));
         } catch (Exception e) {
             throw new AdaptorException(e);
         }

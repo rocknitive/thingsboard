@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.transport.coap.adaptors;
 
+import com.google.gson.JsonElement;
 import org.eclipse.californium.core.coap.Request;
 import org.springframework.util.StringUtils;
 import org.thingsboard.server.common.transport.adaptor.AdaptorException;
@@ -26,6 +27,21 @@ import java.util.List;
 import java.util.Set;
 
 public class CoapAdaptorUtils {
+
+    /**
+     * If the json object has only one key of type array which is called "telemetry" then use the array as the root
+     * element and drop the surrounding container. This will allow multiple updates in one request just like in the
+     * pure json device api.
+     */
+    public static JsonElement convertProtoJsonTelemetry(JsonElement json) throws AdaptorException {
+        if (json.isJsonObject()) {
+            var root = json.getAsJsonObject();
+            if (root.has("telemetry") && root.get("telemetry").isJsonArray() && root.entrySet().size() == 1) {
+                return root.get("telemetry");
+            }
+        }
+        return json;
+    }
 
     public static TransportProtos.GetAttributeRequestMsg toGetAttributeRequestMsg(Request inbound) throws AdaptorException {
         List<String> queryElements = inbound.getOptions().getUriQuery();
