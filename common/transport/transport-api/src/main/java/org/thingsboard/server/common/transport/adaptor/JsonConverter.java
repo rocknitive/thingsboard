@@ -164,9 +164,17 @@ public class JsonConverter {
         return result;
     }
 
+    public static long getTs(long systemTs, JsonElement tsElement) {
+        if (tsElement.isJsonNull()) {
+            return systemTs;
+        }
+        var ts = tsElement.getAsLong();
+        return ts == 0 ? systemTs : ts;
+    }
+
     private static void parseObject(PostTelemetryMsg.Builder builder, long systemTs, JsonObject jo) {
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(builder, jo);
+            parseWithTs(builder, systemTs, jo);
         } else {
             parseWithoutTs(builder, systemTs, jo);
         }
@@ -179,9 +187,9 @@ public class JsonConverter {
         request.addTsKvList(builder.build());
     }
 
-    private static void parseWithTs(PostTelemetryMsg.Builder request, JsonObject jo) {
+    private static void parseWithTs(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
         TsKvListProto.Builder builder = TsKvListProto.newBuilder();
-        builder.setTs(jo.get("ts").getAsLong());
+        builder.setTs(getTs(systemTs, jo.get("ts")));
         builder.addAllKv(parseProtoValues(jo.get("values").getAsJsonObject()));
         request.addTsKvList(builder.build());
     }
@@ -551,7 +559,7 @@ public class JsonConverter {
 
     private static void parseObject(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(result, jo);
+            parseWithTs(result, systemTs, jo);
         } else {
             parseWithoutTs(result, systemTs, jo);
         }
@@ -563,8 +571,8 @@ public class JsonConverter {
         }
     }
 
-    public static void parseWithTs(Map<Long, List<KvEntry>> result, JsonObject jo) {
-        long ts = jo.get("ts").getAsLong();
+    public static void parseWithTs(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
+        long ts = getTs(systemTs, jo.get("ts"));
         JsonObject valuesObject = jo.get("values").getAsJsonObject();
         for (KvEntry entry : parseValues(valuesObject)) {
             result.computeIfAbsent(ts, tmp -> new ArrayList<>()).add(entry);
