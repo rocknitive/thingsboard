@@ -42,7 +42,7 @@ services:
       - kafka
   tb-core1:
     restart: always
-    image: "${DOCKER_REPO_FORK}/${TB_NODE_DOCKER_NAME}:${TB_VERSION_FORK}"
+    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
       - "7070"
@@ -70,7 +70,7 @@ services:
       - kafka
   tb-rule-engine1:
     restart: always
-    image: "${DOCKER_REPO_FORK}/${TB_NODE_DOCKER_NAME}:${TB_VERSION_FORK}"
+    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
     logging:
@@ -127,7 +127,7 @@ services:
       - kafka
   tb-coap-transport:
     restart: always
-    image: "${DOCKER_REPO_FORK}/${COAP_TRANSPORT_DOCKER_NAME}:${TB_VERSION_FORK}"
+    image: "${DOCKER_REPO}/${COAP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "5683:5683/udp"
     environment:
