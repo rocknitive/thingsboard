@@ -5,14 +5,9 @@ on:
     branches: [ release-* ]
   push:
     branches: [ release-* ]
-    tags:
-      - "v*"
-
-env:
-  DOCKER_REGISTRY: ghcr.io
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,44 +22,6 @@ jobs:
           java-version: '11'
           distribution: 'zulu'
 
-      - name: Build with Maven and push Docker images
+      - name: Build with Maven
         working-directory: ${{github.workspace}}
-        run: mvn clean test --batch-mode --update-snapshots -Dlicense.skip
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      
-    steps:
-      - name: Parse tag
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3.0.0
-        with:
-          java-version: '11'
-          distribution: 'zulu'
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{env.DOCKER_REGISTRY}}
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Build with Maven and push Docker images
-        working-directory: ${{github.workspace}}
-        run: mvn clean install --batch-mode --update-snapshots -Dlicense.skip -Ddockerfile.skip=false -Ddocker.repo=${{env.DOCKER_REGISTRY}}/${{github.repository_owner}} -Dpush-docker-image
-
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{env.TAG_VERSION}}
-          files: ${{github.workspace}}/application/target/thingsboard-${{env.TAG_VERSION}}.deb
+        run: mvn clean install --batch-mode --update-snapshots -Dlicense.skip -DskipTests -Ddockerfile.skip=false
