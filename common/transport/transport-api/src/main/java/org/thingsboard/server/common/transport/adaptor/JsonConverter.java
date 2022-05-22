@@ -54,7 +54,6 @@ import org.thingsboard.server.gen.transport.TransportProtos.ValidateDeviceX509Ce
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -173,15 +172,18 @@ public class JsonConverter {
     }
 
     private static void parseObject(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
-        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
         if (jo.has("ts") && jo.has("values")) {
-            builder.setTs(getTs(systemTs, jo.get("ts")));
-            builder.addAllKv(parseProtoValues(jo.get("values").getAsJsonObject()));
+            request.addTsKvList(buildTsKvList(getTs(systemTs, jo.get("ts")), jo.get("values").getAsJsonObject()));
         } else {
-            builder.setTs(systemTs);
-            builder.addAllKv(parseProtoValues(jo));
+            request.addTsKvList(buildTsKvList(systemTs, jo));
         }
-        request.addTsKvList(builder.build());
+    }
+
+    private static TsKvListProto buildTsKvList(long ts, JsonObject jo) {
+        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
+        builder.setTs(ts);
+        builder.addAllKv(parseProtoValues(jo));
+        return builder.build();
     }
 
     private static List<KeyValueProto> parseProtoValues(JsonObject valuesObject) {
@@ -487,10 +489,8 @@ public class JsonConverter {
     }
 
     public static Set<AttributeKvEntry> convertToAttributes(JsonElement element) {
-        Set<AttributeKvEntry> result = new HashSet<>();
         long ts = System.currentTimeMillis();
-        result.addAll(parseValues(element.getAsJsonObject()).stream().map(kv -> new BaseAttributeKvEntry(kv, ts)).collect(Collectors.toList()));
-        return result;
+        return parseValues(element.getAsJsonObject()).stream().map(kv -> new BaseAttributeKvEntry(kv, ts)).collect(Collectors.toSet());
     }
 
     private static List<KvEntry> parseValues(JsonObject valuesObject) {
@@ -548,17 +548,16 @@ public class JsonConverter {
 
 
     private static void parseObject(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
-        long ts;
-        JsonObject values;
         if (jo.has("ts") && jo.has("values")) {
-            ts = getTs(systemTs, jo.get("ts"));
-            values = jo.get("values").getAsJsonObject();
+            addEntries(result, getTs(systemTs, jo.get("ts")), jo.get("values").getAsJsonObject());
         } else {
-            ts = systemTs;
-            values = jo;
+            addEntries(result, systemTs, jo);
         }
-        for (KvEntry entry : parseValues(values)) {
-            result.computeIfAbsent(ts, tmp -> new ArrayList<>()).add(entry);
+    }
+
+    private static void addEntries(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
+        for (KvEntry entry : parseValues(jo)) {
+            result.computeIfAbsent(systemTs, tmp -> new ArrayList<>()).add(entry);
         }
     }
 
