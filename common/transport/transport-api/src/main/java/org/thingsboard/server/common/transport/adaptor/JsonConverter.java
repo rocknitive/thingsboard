@@ -555,9 +555,9 @@ public class JsonConverter {
         }
     }
 
-    private static void addEntries(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
+    private static void addEntries(Map<Long, List<KvEntry>> result, long ts, JsonObject jo) {
         for (KvEntry entry : parseValues(jo)) {
-            result.computeIfAbsent(systemTs, tmp -> new ArrayList<>()).add(entry);
+            result.computeIfAbsent(ts, tmp -> new ArrayList<>()).add(entry);
         }
     }
 
