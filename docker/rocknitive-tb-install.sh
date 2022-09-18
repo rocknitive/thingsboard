@@ -49,4 +49,4 @@ COMPOSE_ARGS="-f docker-compose-rocknitive.yml"
 #docker-compose $COMPOSE_ARGS up -d postgres
 
 docker-compose $COMPOSE_ARGS up -d redis
-docker-compose $COMPOSE_ARGS run --use-aliases --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} tb-core1
+docker-compose $COMPOSE_ARGS run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} tb-core1
