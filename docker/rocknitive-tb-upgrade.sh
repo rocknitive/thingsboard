@@ -38,6 +38,9 @@ fi
 
 set -e
 
+source compose-utils.sh
+checkFolders --create || exit $?
+
 docker-compose -f docker-compose-rocknitive.yml pull tb-core1
 docker-compose -f docker-compose-rocknitive.yml up -d redis
 # only for dev

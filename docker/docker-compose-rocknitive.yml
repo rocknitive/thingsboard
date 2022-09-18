@@ -1,36 +1,14 @@
-#
-# Copyright © 2016-2022 The Thingsboard Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-
 version: '2.2'
 
 services:
   zookeeper:
     restart: always
-    image: "zookeeper:3.5"
+    image: "zookeeper:3.8.0"
     ports:
       - "2181"
     environment:
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=zookeeper:2888:3888;zookeeper:2181
-  redis:
-    restart: always
-    image: redis:4.0
-    ports:
-      - "6379"
   tb-js-executor:
     restart: always
     image: "${DOCKER_REPO}/${JS_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
@@ -55,19 +33,21 @@ services:
       TB_SERVICE_ID: tb-core1
       TB_SERVICE_TYPE: tb-core
       EDGES_ENABLED: "true"
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-node.env
       - rocknitive-tb-node.postgres.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-node/conf:/config
       - ./tb-node/log:/var/log/thingsboard
     depends_on:
       - zookeeper
-      - redis
       - tb-js-executor
       - tb-rule-engine1
       - kafka
+      - redis
   tb-rule-engine1:
     restart: always
     image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
@@ -81,18 +61,20 @@ services:
     environment:
       TB_SERVICE_ID: tb-rule-engine1
       TB_SERVICE_TYPE: tb-rule-engine
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-node.env
       - rocknitive-tb-node.postgres.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-node/conf:/config
       - ./tb-node/log:/var/log/thingsboard
     depends_on:
       - zookeeper
-      - redis
       - tb-js-executor
       - kafka
+      - redis
   tb-mqtt-transport1:
     restart: always
     image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
@@ -100,15 +82,19 @@ services:
       - "1883"
     environment:
       TB_SERVICE_ID: tb-mqtt-transport1
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-mqtt-transport.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-transports/mqtt/conf:/config
       - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
     depends_on:
       - zookeeper
+      - tb-core1
       - kafka
+      - redis
   tb-http-transport1:
     restart: always
     image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
@@ -116,15 +102,19 @@ services:
       - "8081"
     environment:
       TB_SERVICE_ID: tb-http-transport1
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-http-transport.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-transports/http/conf:/config
       - ./tb-transports/http/log:/var/log/tb-http-transport
     depends_on:
       - zookeeper
+      - tb-core1
       - kafka
+      - redis
   tb-coap-transport:
     restart: always
     image: "${DOCKER_REPO}/${COAP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
@@ -132,15 +122,19 @@ services:
       - "5683:5683/udp"
     environment:
       TB_SERVICE_ID: tb-coap-transport
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-coap-transport.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-transports/coap/conf:/config
       - ./tb-transports/coap/log:/var/log/tb-coap-transport
     depends_on:
       - zookeeper
+      - tb-core1
       - kafka
+      - redis
   tb-lwm2m-transport:
     restart: always
     image: "${DOCKER_REPO}/${LWM2M_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
@@ -148,15 +142,19 @@ services:
       - "5685:5685/udp"
     environment:
       TB_SERVICE_ID: tb-lwm2m-transport
+      JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - rocknitive-tb-lwm2m-transport.env
       - queue-kafka.env
+      - cache-redis.env
     volumes:
       - ./tb-transports/lwm2m/conf:/config
       - ./tb-transports/lwm2m/log:/var/log/tb-lwm2m-transport
     depends_on:
       - zookeeper
+      - tb-core1
       - kafka
+      - redis
   tb-web-ui1:
     restart: always
     image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${TB_VERSION}"
@@ -164,6 +162,26 @@ services:
       - "8080"
     env_file:
       - rocknitive-tb-web-ui.env
+  tb-vc-executor1:
+    restart: always
+    image: "${DOCKER_REPO}/${TB_VC_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      - "8081"
+    environment:
+      TB_SERVICE_ID: tb-vc-executor1
+      JAVA_OPTS: "${JAVA_OPTS}"
+    env_file:
+      - tb-vc-executor.env
+      - queue-kafka.env
+      - cache-redis.env
+    volumes:
+      - ./tb-vc-executor/conf:/config
+      - ./tb-vc-executor/log:/var/log/tb-vc-executor
+    depends_on:
+      - zookeeper
+      - tb-core1
+      - kafka
+      - redis
   haproxy:
     restart: always
     container_name: "${LOAD_BALANCER_NAME}"
@@ -191,9 +209,19 @@ services:
         - tb-web-ui1
         - tb-mqtt-transport1
         - tb-http-transport1
+  redis:
+    restart: always
+    image: bitnami/redis:7.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./tb-node/redis-data:/bitnami/redis/data
   kafka:
     restart: always
-    image: "wurstmeister/kafka:2.13-2.6.0"
+    image: "bitnami/kafka:3.2.0"
     ports:
       - "9092:9092"
     env_file:

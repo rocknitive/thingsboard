@@ -6,7 +6,7 @@ services:
     restart: always
     image: "postgres:12"
     ports:
-    - "5432:5432"
+      - "5432:5432"
     environment:
       POSTGRES_DB: thingsboard
       POSTGRES_PASSWORD: postgres
@@ -22,6 +22,6 @@ services:
   # enable remote debugging for coap transport
   tb-coap-transport:
     ports:
-      - '5005:5005'
+      - "5005:5005"
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005

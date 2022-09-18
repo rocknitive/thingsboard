@@ -39,7 +39,14 @@ fi
 
 set -e
 
-docker-compose -f docker-compose-rocknitive.yml up -d redis
-# only for dev
-#docker-compose -f docker-compose-rocknitive.yml up -d postgres
-docker-compose -f docker-compose-rocknitive.yml run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} tb-core1
+source compose-utils.sh
+checkFolders --create || exit $?
+
+COMPOSE_ARGS="-f docker-compose-rocknitive.yml"
+
+# DEV: use local postgres instance
+#COMPOSE_ARGS="$COMPOSE_ARGS -f docker-compose-rocknitive.dev.yml"
+#docker-compose $COMPOSE_ARGS up -d postgres
+
+docker-compose $COMPOSE_ARGS up -d redis
+docker-compose $COMPOSE_ARGS run --use-aliases --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} tb-core1
