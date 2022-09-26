@@ -14,5 +14,8 @@ tb-node/redis-cluster-data-4/**
 tb-node/redis-cluster-data-5/**
 tb-node/redis-data/**
 
+rocknitive-tb-coap-transport.env
 rocknitive-tb-node.postgres.env
 !.env
+
+tb-transports/coap/conf/*.pem
