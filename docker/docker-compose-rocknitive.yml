@@ -120,6 +120,7 @@ services:
     image: "${DOCKER_REPO}/${COAP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "5683:5683/udp"
+      - "5684:5684/udp"
     environment:
       TB_SERVICE_ID: tb-coap-transport
       JAVA_OPTS: "${JAVA_OPTS}"
