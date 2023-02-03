@@ -4,7 +4,7 @@ services:
   # add local postgres instance
   postgres:
     restart: always
-    image: "postgres:12"
+    image: "postgres:11.6"
     ports:
       - "5432:5432"
     environment:
@@ -19,9 +19,3 @@ services:
   tb-rule-engine1:
     depends_on:
       - postgres
-  # enable remote debugging for coap transport
-  tb-coap-transport:
-    ports:
-      - "5005:5005"
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
