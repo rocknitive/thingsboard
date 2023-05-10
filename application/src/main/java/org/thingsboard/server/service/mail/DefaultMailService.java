@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -199,8 +201,19 @@ public class DefaultMailService implements MailService {
 
         String subject = messages.getMessage("activation.subject", null, Locale.US);
 
+        String activationToken = null;
+        Pattern activationTokenPattern = Pattern.compile("\\?activateToken=(.*)");
+        Matcher activationTokenPatternMatcher = activationTokenPattern.matcher(activationLink);
+
+        while(activationTokenPatternMatcher.find()) {
+            activationToken = activationTokenPatternMatcher.group(1);
+            System.out.println("found token: " + activationToken);
+        }
+
+
         Map<String, Object> model = new HashMap<>();
         model.put("activationLink", activationLink);
+        model.put("activationToken", activationToken);
         model.put(TARGET_EMAIL, email);
 
         String message = mergeTemplateIntoString("activation.ftl", model);
@@ -227,8 +240,11 @@ public class DefaultMailService implements MailService {
 
         String subject = messages.getMessage("reset.password.subject", null, Locale.US);
 
+        String currentResetPasswordToken = passwordResetLink.split("=")[1];
+
         Map<String, Object> model = new HashMap<>();
         model.put("passwordResetLink", passwordResetLink);
+        model.put("passwordResetToken", currentResetPasswordToken);
         model.put(TARGET_EMAIL, email);
 
         String message = mergeTemplateIntoString("reset.password.ftl", model);
