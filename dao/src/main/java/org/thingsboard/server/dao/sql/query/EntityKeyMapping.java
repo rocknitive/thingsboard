@@ -73,8 +73,10 @@ public class EntityKeyMapping {
     public static final String PHONE = "phone";
     public static final String ADDITIONAL_INFO = "additionalInfo";
     public static final String RELATED_PARENT_ID = "parentId";
+    public static final String START_TIME_MS = "startTimeMs";
+    public static final String END_TIME_MS = "endTimeMs";
 
-    public static final List<String> typedEntityFields = Arrays.asList(CREATED_TIME, ENTITY_TYPE, NAME, TYPE, ADDITIONAL_INFO);
+    public static final List<String> typedEntityFields = Arrays.asList(CREATED_TIME, ENTITY_TYPE, NAME, TYPE, ADDITIONAL_INFO, START_TIME_MS, END_TIME_MS);
     public static final List<String> widgetEntityFields = Arrays.asList(CREATED_TIME, ENTITY_TYPE, NAME);
     public static final List<String> commonEntityFields = Arrays.asList(CREATED_TIME, ENTITY_TYPE, NAME, ADDITIONAL_INFO);
     public static final List<String> dashboardEntityFields = Arrays.asList(CREATED_TIME, ENTITY_TYPE, TITLE);
@@ -123,6 +125,8 @@ public class EntityKeyMapping {
         entityFieldColumnMap.put(PHONE, ModelConstants.PHONE_PROPERTY);
         entityFieldColumnMap.put(ADDITIONAL_INFO, ModelConstants.ADDITIONAL_INFO_PROPERTY);
         entityFieldColumnMap.put(RELATED_PARENT_ID, "parent_id");
+        entityFieldColumnMap.put(START_TIME_MS, ModelConstants.ENTITY_VIEW_START_TS_PROPERTY);
+        entityFieldColumnMap.put(END_TIME_MS, ModelConstants.ENTITY_VIEW_END_TS_PROPERTY);
 
         Map<String, String> contactBasedAliases = new HashMap<>();
         contactBasedAliases.put(NAME, TITLE);
