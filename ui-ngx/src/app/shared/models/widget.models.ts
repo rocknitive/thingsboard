@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2022 The Thingsboard Authors
+/// Copyright © 2016-2023 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -17,19 +17,25 @@
 import { BaseData } from '@shared/models/base-data';
 import { TenantId } from '@shared/models/id/tenant-id';
 import { WidgetTypeId } from '@shared/models/id/widget-type-id';
-import { Timewindow } from '@shared/models/time/time.models';
+import { AggregationType, ComparisonDuration, Timewindow } from '@shared/models/time/time.models';
 import { EntityType } from '@shared/models/entity-type.models';
 import { AlarmSearchStatus, AlarmSeverity } from '@shared/models/alarm.models';
 import { DataKeyType } from './telemetry/telemetry.models';
 import { EntityId } from '@shared/models/id/entity-id';
 import * as moment_ from 'moment';
-import { EntityDataPageLink, EntityFilter, KeyFilter } from '@shared/models/query/query.models';
+import {
+  AlarmFilter,
+  AlarmFilterConfig,
+  EntityDataPageLink,
+  EntityFilter,
+  KeyFilter
+} from '@shared/models/query/query.models';
 import { PopoverPlacement } from '@shared/components/popover.models';
 import { PageComponent } from '@shared/components/page.component';
-import { AfterViewInit, Directive, EventEmitter, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Directive, EventEmitter, Inject, OnInit, Type } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { AbstractControl, FormGroup } from '@angular/forms';
+import { AbstractControl, UntypedFormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { Dashboard } from '@shared/models/dashboard.models';
 import { IAliasController } from '@core/api/widget-api.models';
@@ -173,7 +179,7 @@ export interface WidgetTypeParameters {
   hasAdditionalLatestDataKeys?: boolean;
   warnOnPageDataOverflow?: boolean;
   ignoreDataUpdateOnIntervalTick?: boolean;
-
+  processNoDataByWidget?: boolean;
 }
 
 export interface WidgetControllerDescriptor {
@@ -259,8 +265,27 @@ export function defaultLegendConfig(wType: widgetType): LegendConfig {
   };
 }
 
+export enum ComparisonResultType {
+  PREVIOUS_VALUE = 'PREVIOUS_VALUE',
+  DELTA_ABSOLUTE = 'DELTA_ABSOLUTE',
+  DELTA_PERCENT = 'DELTA_PERCENT'
+}
+
+export const comparisonResultTypeTranslationMap = new Map<ComparisonResultType, string>(
+  [
+    [ComparisonResultType.PREVIOUS_VALUE, 'datakey.delta-calculation-result-previous-value'],
+    [ComparisonResultType.DELTA_ABSOLUTE, 'datakey.delta-calculation-result-delta-absolute'],
+    [ComparisonResultType.DELTA_PERCENT, 'datakey.delta-calculation-result-delta-percent']
+  ]
+);
+
 export interface KeyInfo {
   name: string;
+  aggregationType?: AggregationType;
+  comparisonEnabled?: boolean;
+  timeForComparison?: ComparisonDuration;
+  comparisonCustomIntervalValue?: number;
+  comparisonResultType?: ComparisonResultType;
   label?: string;
   color?: string;
   funcBody?: string;
@@ -268,6 +293,18 @@ export interface KeyInfo {
   units?: string;
   decimals?: number;
 }
+
+export const dataKeyAggregationTypeHintTranslationMap = new Map<AggregationType, string>(
+  [
+    [AggregationType.MIN, 'datakey.aggregation-type-min-hint'],
+    [AggregationType.MAX, 'datakey.aggregation-type-max-hint'],
+    [AggregationType.AVG, 'datakey.aggregation-type-avg-hint'],
+    [AggregationType.SUM, 'datakey.aggregation-type-sum-hint'],
+    [AggregationType.COUNT, 'datakey.aggregation-type-count-hint'],
+    [AggregationType.NONE, 'datakey.aggregation-type-none-hint'],
+  ]
+);
+
 
 export interface DataKey extends KeyInfo {
   type: DataKeyType;
@@ -284,14 +321,16 @@ export interface DataKey extends KeyInfo {
 export enum DatasourceType {
   function = 'function',
   entity = 'entity',
-  entityCount = 'entityCount'
+  entityCount = 'entityCount',
+  alarmCount = 'alarmCount'
 }
 
 export const datasourceTypeTranslationMap = new Map<DatasourceType, string>(
   [
     [ DatasourceType.function, 'function.function' ],
     [ DatasourceType.entity, 'entity.entity' ],
-    [ DatasourceType.entityCount, 'entity.entities-count' ]
+    [ DatasourceType.entityCount, 'entity.entities-count' ],
+    [ DatasourceType.alarmCount, 'entity.alarms-count' ]
   ]
 );
 
@@ -317,9 +356,42 @@ export interface Datasource {
   pageLink?: EntityDataPageLink;
   keyFilters?: Array<KeyFilter>;
   entityFilter?: EntityFilter;
+  alarmFilterConfig?: AlarmFilterConfig;
+  alarmFilter?: AlarmFilter;
   dataKeyStartIndex?: number;
   latestDataKeyStartIndex?: number;
   [key: string]: any;
+}
+
+export function datasourcesHasAggregation(datasources?: Array<Datasource>): boolean {
+  if (datasources) {
+    const foundDatasource = datasources.find(datasource => {
+      const found = datasource.dataKeys && datasource.dataKeys.find(key => key.type === DataKeyType.timeseries &&
+        key.aggregationType && key.aggregationType !== AggregationType.NONE);
+      return !!found;
+    });
+    if (foundDatasource) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function datasourcesHasOnlyComparisonAggregation(datasources?: Array<Datasource>): boolean {
+  if (!datasourcesHasAggregation(datasources)) {
+    return false;
+  }
+  if (datasources) {
+    const foundDatasource = datasources.find(datasource => {
+      const found = datasource.dataKeys && datasource.dataKeys.find(key => key.type === DataKeyType.timeseries &&
+        key.aggregationType && key.aggregationType !== AggregationType.NONE && !key.comparisonEnabled);
+      return !!found;
+    });
+    if (foundDatasource) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export interface FormattedData {
@@ -488,6 +560,7 @@ export interface CustomActionDescriptor {
   customResources?: Array<WidgetResource>;
   customHtml?: string;
   customCss?: string;
+  customModules?: Type<any>[];
 }
 
 export interface WidgetActionDescriptor extends CustomActionDescriptor {
@@ -544,6 +617,7 @@ export interface WidgetConfig {
   showLegend?: boolean;
   legendConfig?: LegendConfig;
   timewindow?: Timewindow;
+  desktopHide?: boolean;
   mobileHide?: boolean;
   mobileHeight?: number;
   mobileOrder?: number;
@@ -561,10 +635,7 @@ export interface WidgetConfig {
   actions?: {[actionSourceId: string]: Array<WidgetActionDescriptor>};
   settings?: WidgetSettings;
   alarmSource?: Datasource;
-  alarmStatusList?: AlarmSearchStatus[];
-  alarmSeverityList?: AlarmSeverity[];
-  alarmTypeList?: string[];
-  searchPropagatedAlarms?: boolean;
+  alarmFilterConfig?: AlarmFilterConfig;
   datasources?: Array<Datasource>;
   targetDeviceAliasIds?: Array<string>;
   [key: string]: any;
@@ -643,7 +714,7 @@ function removeEmptyWidgetSettings(settings: WidgetSettings): WidgetSettings {
 }
 
 @Directive()
-// tslint:disable-next-line:directive-class-suffix
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export abstract class WidgetSettingsComponent extends PageComponent implements
   IWidgetSettingsComponent, OnInit, AfterViewInit {
 
@@ -739,7 +810,7 @@ export abstract class WidgetSettingsComponent extends PageComponent implements
     }
   }
 
-  protected doUpdateSettings(settingsForm: FormGroup, settings: WidgetSettings) {
+  protected doUpdateSettings(settingsForm: UntypedFormGroup, settings: WidgetSettings) {
   }
 
   protected prepareInputSettings(settings: WidgetSettings): WidgetSettings {
@@ -756,7 +827,7 @@ export abstract class WidgetSettingsComponent extends PageComponent implements
 
   protected onValidate() {}
 
-  protected abstract settingsForm(): FormGroup;
+  protected abstract settingsForm(): UntypedFormGroup;
 
   protected abstract onSettingsSet(settings: WidgetSettings);
 

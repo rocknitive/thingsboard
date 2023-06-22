@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2022 The Thingsboard Authors
+/// Copyright © 2016-2023 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import { ItemBufferService, WidgetItem } from '@core/services/item-buffer.servic
 import {
   BulkImportRequest,
   BulkImportResult,
+  CSV_TYPE,
   FileType,
   ImportWidgetResult,
   JSON_TYPE,
@@ -72,6 +73,8 @@ import { DeviceService } from '@core/http/device.service';
 import { AssetService } from '@core/http/asset.service';
 import { EdgeService } from '@core/http/edge.service';
 import { RuleNode } from '@shared/models/rule-node.models';
+import { AssetProfileService } from '@core/http/asset-profile.service';
+import { AssetProfile } from '@shared/models/asset.models';
 
 // @dynamic
 @Injectable()
@@ -85,6 +88,7 @@ export class ImportExportService {
               private dashboardUtils: DashboardUtilsService,
               private widgetService: WidgetService,
               private deviceProfileService: DeviceProfileService,
+              private assetProfileService: AssetProfileService,
               private tenantProfileService: TenantProfileService,
               private entityService: EntityService,
               private ruleChainService: RuleChainService,
@@ -463,6 +467,7 @@ export class ImportExportService {
           const ruleChainNode: RuleNode = {
             name: '',
             debugMode: false,
+            singletonMode: false,
             type: 'org.thingsboard.rule.engine.flow.TbRuleChainInputNode',
             configuration: {
               ruleChainId: ruleChainConnection.targetRuleChainId.id
@@ -532,6 +537,37 @@ export class ImportExportService {
     );
   }
 
+  public exportAssetProfile(assetProfileId: string) {
+    this.assetProfileService.getAssetProfile(assetProfileId).subscribe(
+      (assetProfile) => {
+        let name = assetProfile.name;
+        name = name.toLowerCase().replace(/\W/g, '_');
+        this.exportToPc(this.prepareProfileExport(assetProfile), name);
+      },
+      (e) => {
+        this.handleExportError(e, 'asset-profile.export-failed-error');
+      }
+    );
+  }
+
+  public importAssetProfile(): Observable<AssetProfile> {
+    return this.openImportDialog('asset-profile.import', 'asset-profile.asset-profile-file').pipe(
+      mergeMap((assetProfile: AssetProfile) => {
+        if (!this.validateImportedAssetProfile(assetProfile)) {
+          this.store.dispatch(new ActionNotificationShow(
+            {message: this.translate.instant('asset-profile.invalid-asset-profile-file-error'),
+              type: 'error'}));
+          throw new Error('Invalid asset profile file');
+        } else {
+          return this.assetProfileService.saveAssetProfile(assetProfile);
+        }
+      }),
+      catchError((err) => {
+        return of(null);
+      })
+    );
+  }
+
   public exportTenantProfile(tenantProfileId: string) {
     this.tenantProfileService.getTenantProfile(tenantProfileId).subscribe(
       (tenantProfile) => {
@@ -561,6 +597,35 @@ export class ImportExportService {
         return of(null);
       })
     );
+  }
+
+  private processCSVCell(cellData: any): any {
+    if (isString(cellData)) {
+      let result = cellData.replace(/"/g, '""');
+      if (result.search(/([",\n])/g) >= 0) {
+        result = `"${result}"`;
+      }
+      return result;
+    }
+    return cellData;
+  }
+
+  public exportCsv(data: {[key: string]: any}[], filename: string) {
+    let colsHead: string;
+    let colsData: string;
+    if (data && data.length) {
+      colsHead = Object.keys(data[0]).map(key => [this.processCSVCell(key)]).join(';');
+      colsData = data.map(obj => [
+        Object.keys(obj).map(col => [
+          this.processCSVCell(obj[col])
+        ]).join(';')
+      ]).join('\n');
+    } else {
+      colsHead = '';
+      colsData = '';
+    }
+    const csvData = `${colsHead}\n${colsData}`;
+    this.downloadFile(csvData, filename, CSV_TYPE);
   }
 
   public exportText(data: string | Array<string>, filename: string) {
@@ -623,6 +688,13 @@ export class ImportExportService {
       || isUndefined(deviceProfile.transportType)
       || isUndefined(deviceProfile.provisionType)
       || isUndefined(deviceProfile.profileData)) {
+      return false;
+    }
+    return true;
+  }
+
+  private validateImportedAssetProfile(assetProfile: AssetProfile): boolean {
+    if (isUndefined(assetProfile.name)) {
       return false;
     }
     return true;
@@ -892,7 +964,9 @@ export class ImportExportService {
     }
     filename += '.' + fileType.extension;
     const blob = new Blob([data], {type: fileType.mimeType});
+    // @ts-ignore
     if (this.window.navigator && this.window.navigator.msSaveOrOpenBlob) {
+      // @ts-ignore
       this.window.navigator.msSaveOrOpenBlob(blob, filename);
     } else {
       const e = this.document.createEvent('MouseEvents');
@@ -913,7 +987,7 @@ export class ImportExportService {
     return dashboard;
   }
 
-  private prepareProfileExport<T extends DeviceProfile|TenantProfile>(profile: T): T {
+  private prepareProfileExport<T extends DeviceProfile|AssetProfile|TenantProfile>(profile: T): T {
     profile = this.prepareExport(profile);
     profile.default = false;
     return profile;

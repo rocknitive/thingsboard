@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2022 The Thingsboard Authors
+/// Copyright © 2016-2023 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -170,10 +170,23 @@ import { RateLimitsListComponent } from '@home/components/profile/tenant/rate-li
 import { RateLimitsComponent } from '@home/components/profile/tenant/rate-limits/rate-limits.component';
 import { RateLimitsTextComponent } from '@home/components/profile/tenant/rate-limits/rate-limits-text.component';
 import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenant/rate-limits/rate-limits-details-dialog.component';
+import { AssetProfileComponent } from '@home/components/profile/asset-profile.component';
+import { AssetProfileDialogComponent } from '@home/components/profile/asset-profile-dialog.component';
+import { AssetProfileAutocompleteComponent } from '@home/components/profile/asset-profile-autocomplete.component';
+import { MODULES_MAP } from '@shared/models/constants';
+import { modulesMap } from '@modules/common/modules-map';
+import { AlarmAssigneePanelComponent } from '@home/components/alarm/alarm-assignee-panel.component';
+import { RouterTabsComponent } from '@home/components/router-tabs.component';
+import { SendNotificationButtonComponent } from '@home/components/notification/send-notification-button.component';
+import { AlarmFilterConfigComponent } from '@home/components/alarm/alarm-filter-config.component';
+import { AlarmAssigneeSelectPanelComponent } from '@home/components/alarm/alarm-assignee-select-panel.component';
+import { AlarmAssigneeSelectComponent } from '@home/components/alarm/alarm-assignee-select.component';
+import { DeviceInfoFilterComponent } from '@home/components/device/device-info-filter.component';
 
 @NgModule({
   declarations:
     [
+      RouterTabsComponent,
       EntitiesTableComponent,
       AddEntityDialogComponent,
       DetailsPanelComponent,
@@ -192,6 +205,10 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
       RelationFiltersComponent,
       AlarmTableHeaderComponent,
       AlarmTableComponent,
+      AlarmAssigneePanelComponent,
+      AlarmAssigneeSelectComponent,
+      AlarmAssigneeSelectPanelComponent,
+      AlarmFilterConfigComponent,
       AttributeTableComponent,
       AddAttributeDialogComponent,
       EditAttributeValuePanelComponent,
@@ -266,6 +283,10 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
       DeviceProfileComponent,
       DeviceProfileDialogComponent,
       AddDeviceProfileDialogComponent,
+      DeviceInfoFilterComponent,
+      AssetProfileComponent,
+      AssetProfileDialogComponent,
+      AssetProfileAutocompleteComponent,
       RuleChainAutocompleteComponent,
       AlarmScheduleInfoComponent,
       DeviceProfileProvisionConfigurationComponent,
@@ -310,7 +331,8 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
       RateLimitsListComponent,
       RateLimitsComponent,
       RateLimitsTextComponent,
-      RateLimitsDetailsDialogComponent
+      RateLimitsDetailsDialogComponent,
+      SendNotificationButtonComponent
     ],
   imports: [
     CommonModule,
@@ -324,6 +346,7 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
     DeviceProfileCommonModule
   ],
   exports: [
+    RouterTabsComponent,
     EntitiesTableComponent,
     AddEntityDialogComponent,
     DetailsPanelComponent,
@@ -336,6 +359,10 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
     RelationTableComponent,
     RelationFiltersComponent,
     AlarmTableComponent,
+    AlarmAssigneePanelComponent,
+    AlarmAssigneeSelectComponent,
+    AlarmAssigneeSelectPanelComponent,
+    AlarmFilterConfigComponent,
     AttributeTableComponent,
     AliasesEntitySelectComponent,
     AliasesEntityAutocompleteComponent,
@@ -400,8 +427,12 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
     DeviceProfileComponent,
     DeviceProfileDialogComponent,
     AddDeviceProfileDialogComponent,
+    DeviceInfoFilterComponent,
     RuleChainAutocompleteComponent,
     DeviceWizardDialogComponent,
+    AssetProfileComponent,
+    AssetProfileDialogComponent,
+    AssetProfileAutocompleteComponent,
     AlarmScheduleInfoComponent,
     AlarmScheduleComponent,
     AlarmDynamicValue,
@@ -444,7 +475,8 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
     RateLimitsListComponent,
     RateLimitsComponent,
     RateLimitsTextComponent,
-    RateLimitsDetailsDialogComponent
+    RateLimitsDetailsDialogComponent,
+    SendNotificationButtonComponent
   ],
   providers: [
     WidgetComponentService,
@@ -453,7 +485,8 @@ import { RateLimitsDetailsDialogComponent } from '@home/components/profile/tenan
     {provide: EMBED_DASHBOARD_DIALOG_TOKEN, useValue: EmbedDashboardDialogComponent},
     {provide: COMPLEX_FILTER_PREDICATE_DIALOG_COMPONENT_TOKEN, useValue: ComplexFilterPredicateDialogComponent},
     {provide: DASHBOARD_PAGE_COMPONENT_TOKEN, useValue: DashboardPageComponent},
-    {provide: HOME_COMPONENTS_MODULE_TOKEN, useValue: HomeComponentsModule }
+    {provide: HOME_COMPONENTS_MODULE_TOKEN, useValue: HomeComponentsModule },
+    {provide: MODULES_MAP, useValue: modulesMap}
   ]
 })
 export class HomeComponentsModule { }

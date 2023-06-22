@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2022 The Thingsboard Authors
+ * Copyright © 2016-2023 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.thingsboard.common.util.JacksonUtil;
@@ -116,7 +115,7 @@ import java.util.stream.Collectors;
  * @author Andrew Shvayka
  */
 @Slf4j
-class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcessor {
+public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcessor {
 
     static final String SESSION_TIMEOUT_MESSAGE = "session timeout!";
     final TenantId tenantId;
@@ -205,8 +204,7 @@ class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcessor {
                 saveRpcRequestToEdgeQueue(request, rpcRequest.getRequestId()).get();
                 sent = true;
             } catch (InterruptedException | ExecutionException e) {
-                String errMsg = String.format("[%s][%s][%s] Failed to save rpc request to edge queue %s", tenantId, deviceId, edgeId.getId(), request);
-                log.error(errMsg, e);
+                log.error("[{}][{}][{}] Failed to save rpc request to edge queue {}", tenantId, deviceId, edgeId.getId(), request, e);
             }
         } else if (isSendNewRpcAvailable()) {
             sent = rpcSubscriptions.size() > 0;
@@ -829,6 +827,9 @@ class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcessor {
         body.put("expirationTime", msg.getExpirationTime());
         body.put("method", msg.getBody().getMethod());
         body.put("params", msg.getBody().getParams());
+        body.put("persisted", msg.isPersisted());
+        body.put("retries", msg.getRetries());
+        body.put("additionalInfo", msg.getAdditionalInfo());
 
         EdgeEvent edgeEvent = EdgeUtils.constructEdgeEvent(tenantId, edgeId, EdgeEventType.DEVICE, EdgeEventActionType.RPC_CALL, deviceId, body);
 

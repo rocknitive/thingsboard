@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2022 The Thingsboard Authors
+ * Copyright © 2016-2023 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileDao;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
+import org.thingsboard.server.dao.util.SqlDao;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@SqlDao
 public class JpaDeviceProfileDao extends JpaAbstractSearchTextDao<DeviceProfileEntity, DeviceProfile> implements DeviceProfileDao {
 
     @Autowired
