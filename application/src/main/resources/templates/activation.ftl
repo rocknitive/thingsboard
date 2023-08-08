@@ -306,7 +306,7 @@
                                                                             <td align="center" bgcolor="#0d4b8a"
                                                                                 class="inner-td"
                                                                                 style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                                                                                <a href="https://app.aqua-free-services.com/token/$activationToken"
+                                                                                <a href="https://app.aqua-free-services.com/token/${activationToken}"
                                                                                    style="background-color:#0d4b8a; border:1px solid #0D4B8A; border-color:#0D4B8A; border-radius:6px; border-width:1px; color:#ffffff; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 18px 12px 18px; text-align:center; text-decoration:none; border-style:solid;"
                                                                                    target="_blank">Activate account
                                                                                     now</a>
@@ -336,7 +336,7 @@
                                                                             app:
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            <em>$activationToken</em></div>
+                                                                            <em>${activationToken}</em></div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -481,7 +481,7 @@
                                                                             <td align="center" bgcolor="#0d4b8a"
                                                                                 class="inner-td"
                                                                                 style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                                                                                <a href="https://app.aqua-free-services.com/token/$activationToken"
+                                                                                <a href="https://app.aqua-free-services.com/token/${activationToken}"
                                                                                    style="background-color:#0d4b8a; border:1px solid #0D4B8A; border-color:#0D4B8A; border-radius:6px; border-width:1px; color:#ffffff; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 18px 12px 18px; text-align:center; text-decoration:none; border-style:solid;"
                                                                                    target="_blank">Account jetzt
                                                                                     aktivieren</a>
@@ -511,7 +511,7 @@
                                                                             folgenden Aktivierungscode in die App:
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            <em>$activationToken</em></div>
+                                                                            <em>${activationToken}</em></div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>

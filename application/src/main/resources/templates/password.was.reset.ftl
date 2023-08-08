@@ -273,7 +273,7 @@
 
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br>
-                                                                            <a href="https://hygenius.aqua-free.com/resetToken/$passwordResetToken" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Reset Password</a>
+                                                                            <a href="https://hygenius.aqua-free.com/resetToken/${passwordResetToken}" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Reset Password</a>
                                                                         </div>
                                                                         <div></div>
                                                                     </div>
@@ -299,7 +299,7 @@
                                                                             app:
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            <em>$passwordResetToken</em></div>
+                                                                            <em>${passwordResetToken}</em></div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -412,7 +412,7 @@
 
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br>
-                                                                            <a href="https://hygenius.aqua-free.com/resetToken/$passwordResetToken" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Reset Password</a>
+                                                                            <a href="https://hygenius.aqua-free.com/resetToken/${passwordResetToken}" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Reset Password</a>
                                                                         </div>
                                                                         <div></div>
                                                                     </div>
@@ -438,7 +438,7 @@
                                                                             folgenden Code in die App:
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            <em>$passwordResetToken</em></div>
+                                                                            <em>${passwordResetToken}</em></div>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>

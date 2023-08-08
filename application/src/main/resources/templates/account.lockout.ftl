@@ -191,7 +191,7 @@
                                                             <tbody>
                                                             <tr>
                                                                 <td role="module-content">
-                                                                    <p>Der Account $lockoutAccount wurde geblockt.</p>
+                                                                    <p>Der Account ${lockoutAccount} wurde geblockt.</p>
                                                                 </td>
                                                             </tr>
                                                             </tbody>
@@ -244,7 +244,7 @@
                                                                 <td style="padding:18px 0px 18px 0px; line-height:40px; text-align:inherit;"
                                                                     height="100%" valign="top" bgcolor=""
                                                                     role="module-content">
-                                                                    <div><h1 style="text-align: inherit">User account $lockoutAccount has been locked.</h1>
+                                                                    <div><h1 style="text-align: inherit">User account ${lockoutAccount} has been locked.</h1>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -263,14 +263,14 @@
                                                                     role="module-content">
                                                                     <div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            Your HyGenius account $lockoutAccount has been locked out due to failed credentials were provided more than $maxFailedLoginAttempts times.<br>
+                                                                            Your HyGenius account ${lockoutAccount} has been locked out due to failed credentials were provided more than ${maxFailedLoginAttempts} times.<br>
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br></div>
 
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br>
-                                                                            This email was sent to <a href="mailto:$targetEmail" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">$targetEmail</a> by HyGenius
+                                                                            This email was sent to <a href="mailto:${targetEmail}" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">${targetEmail}</a> by HyGenius
                                                                         </div>
                                                                         <div></div>
                                                                     </div>
@@ -356,7 +356,7 @@
                                                                     height="100%" valign="top" bgcolor=""
                                                                     role="module-content">
                                                                     <div><h1 style="text-align: inherit">
-                                                                        Der Account $lockoutAccount wurde geblockt.</h1>
+                                                                        Der Account ${lockoutAccount} wurde geblockt.</h1>
                                                                         <div></div>
                                                                     </div>
                                                                 </td>
@@ -375,14 +375,14 @@
                                                                     role="module-content">
                                                                     <div>
                                                                         <div style="font-family: inherit; text-align: inherit">
-                                                                            Der HyGenius-Account $lockoutAccount wurde aufgrund von $maxFailedLoginAttempts Loginversuchen geblockt.<br>
+                                                                            Der HyGenius-Account ${lockoutAccount} wurde aufgrund von ${maxFailedLoginAttempts} Loginversuchen geblockt.<br>
                                                                         </div>
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br></div>
 
                                                                         <div style="font-family: inherit; text-align: inherit">
                                                                             <br>
-                                                                            Diese Mail wurde von HyGenius an <a href="mailto:$targetEmail" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">$targetEmail</a> gesendet.
+                                                                            Diese Mail wurde von HyGenius an <a href="mailto:${targetEmail}" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">${targetEmail}</a> gesendet.
                                                                         </div>
                                                                         <div></div>
                                                                     </div>
