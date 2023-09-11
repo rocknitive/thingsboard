@@ -249,6 +249,7 @@ public class ActorSystemContext {
     private RuleNodeStateService ruleNodeStateService;
 
     @Autowired
+    @Getter
     private PartitionService partitionService;
 
     @Autowired
@@ -537,6 +538,10 @@ public class ActorSystemContext {
     @Value("${actors.rpc.max_retries:5}")
     @Getter
     private int maxRpcRetries;
+
+    @Value("${actors.rule.external.force_ack:false}")
+    @Getter
+    private boolean externalNodeForceAck;
 
     @Getter
     @Setter
