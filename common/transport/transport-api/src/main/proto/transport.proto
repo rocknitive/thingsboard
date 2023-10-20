@@ -31,6 +31,11 @@ message AttributesRequest {
   string sharedKeys = 2;
 }
 
+message AttributesResponse {
+  repeated transport.KeyValueProto clientAttributeList = 1;
+  repeated transport.KeyValueProto sharedAttributeList = 2;
+}
+
 message RpcRequest {
   string method = 1;
   string params = 2;

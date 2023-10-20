@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3.0.0
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{env.DOCKER_REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Parse tag
+        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Set version from tag
+        working-directory: ${{github.workspace}}
+        run: mvn versions:set -DnewVersion=${{env.TAG_VERSION}} -DgenerateBackupPoms=false
+
+      - name: Build with Maven and push Docker images
+        working-directory: ${{github.workspace}}
+        run: mvn clean install --batch-mode --update-snapshots -Dlicense.skip -DskipTests -Ddockerfile.skip=false -Ddocker.repo=${{env.DOCKER_REGISTRY}}/${{github.repository_owner}} -Dpush-docker-image
+
+      - name: Append version to filename of thingsboard.deb
+        working-directory: ${{github.workspace}}/application/target/
+        run: mv thingsboard.deb thingsboard-${{env.TAG_VERSION}}.deb
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: ${{github.workspace}}/application/target/thingsboard-${{env.TAG_VERSION}}.deb
