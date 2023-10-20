@@ -32,6 +32,7 @@ import org.thingsboard.server.common.transport.adaptor.AdaptorException;
 import org.thingsboard.server.common.transport.adaptor.JsonConverter;
 import org.thingsboard.server.common.transport.adaptor.ProtoConverter;
 import org.thingsboard.server.gen.transport.TransportProtos;
+import org.thingsboard.server.gen.transport.TransportApiProtos;
 import org.thingsboard.server.transport.coap.CoapTransportResource;
 
 import java.util.Optional;

@@ -39,6 +39,10 @@ jobs:
         working-directory: ${{github.workspace}}
         run: mvn versions:set -DnewVersion=${{env.TAG_VERSION}} -DgenerateBackupPoms=false
 
+      - name: Build protobuf packages
+        working-directory: ${{github.workspace}}
+        run: ./build_proto.sh
+
       - name: Build with Maven and push Docker images
         working-directory: ${{github.workspace}}
         run: mvn clean install --batch-mode --update-snapshots -Dlicense.skip -DskipTests -Ddockerfile.skip=false -Ddocker.repo=${{env.DOCKER_REGISTRY}}/${{github.repository_owner}} -Dpush-docker-image
