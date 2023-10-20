@@ -212,8 +212,8 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
                         importResult.setUpdatedRelatedEntities(true);
                         relationService.deleteRelation(ctx.getTenantId(), existingRelation.getFrom(), existingRelation.getTo(), existingRelation.getType(), existingRelation.getTypeGroup());
                         importResult.addSendEventsCallback(() -> {
-                            entityNotificationService.notifyRelation(tenantId, null,
-                                    existingRelation, ctx.getUser(), ActionType.RELATION_DELETED, existingRelation);
+                            entityNotificationService.logEntityRelationAction(tenantId, null,
+                                    existingRelation, ctx.getUser(), ActionType.RELATION_DELETED, null, existingRelation);
                         });
                     } else if (Objects.equal(relation.getAdditionalInfo(), existingRelation.getAdditionalInfo())) {
                         relationsMap.remove(relation);
@@ -267,8 +267,8 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
     }
 
     protected void onEntitySaved(User user, E savedEntity, E oldEntity) throws ThingsboardException {
-        entityNotificationService.notifyCreateOrUpdateEntity(user.getTenantId(), savedEntity.getId(), savedEntity,
-                null, oldEntity == null ? ActionType.ADDED : ActionType.UPDATED, user);
+        entityNotificationService.logEntityAction(user.getTenantId(), savedEntity.getId(), savedEntity, null,
+                oldEntity == null ? ActionType.ADDED : ActionType.UPDATED, user);
     }
 
 
@@ -388,11 +388,11 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
     }
 
     protected void replaceIdsRecursively(EntitiesImportCtx ctx, IdProvider idProvider, JsonNode json,
-                                         Set<String> skipFieldsSet, Pattern includedFieldsPattern,
+                                         Set<String> skippedRootFields, Pattern includedFieldsPattern,
                                          LinkedHashSet<EntityType> hints) {
-        JacksonUtil.replaceUuidsRecursively(json, skipFieldsSet, includedFieldsPattern,
+        JacksonUtil.replaceUuidsRecursively(json, skippedRootFields, includedFieldsPattern,
                 uuid -> idProvider.getInternalIdByUuid(uuid, ctx.isFinalImportAttempt(), hints)
-                        .map(EntityId::getId).orElse(uuid));
+                        .map(EntityId::getId).orElse(uuid), true);
     }
 
 }

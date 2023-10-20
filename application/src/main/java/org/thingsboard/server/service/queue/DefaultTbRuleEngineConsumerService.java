@@ -183,19 +183,20 @@ public class DefaultTbRuleEngineConsumerService extends AbstractConsumerService<
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent event) {
         if (event.getServiceType().equals(getServiceType())) {
-            String serviceQueue = event.getQueueKey().getQueueName();
-            log.info("[{}] Subscribing to partitions: {}", serviceQueue, event.getPartitions());
-            Queue configuration = consumerConfigurations.get(event.getQueueKey());
-            if (configuration == null) {
-                log.warn("Received invalid partition change event for {} that is not managed by this service", event.getQueueKey());
-                return;
-            }
-            if (!configuration.isConsumerPerPartition()) {
-                consumers.get(event.getQueueKey()).subscribe(event.getPartitions());
-            } else {
-                log.info("[{}] Subscribing consumer per partition: {}", serviceQueue, event.getPartitions());
-                subscribeConsumerPerPartition(event.getQueueKey(), event.getPartitions());
-            }
+            event.getPartitionsMap().forEach((queueKey, partitions) -> {
+                String serviceQueue = queueKey.getQueueName();
+                log.info("[{}] Subscribing to partitions: {}", serviceQueue, partitions);
+                Queue configuration = consumerConfigurations.get(queueKey);
+                if (configuration == null) {
+                    return;
+                }
+                if (!configuration.isConsumerPerPartition()) {
+                    consumers.get(queueKey).subscribe(partitions);
+                } else {
+                    log.info("[{}] Subscribing consumer per partition: {}", serviceQueue, partitions);
+                    subscribeConsumerPerPartition(queueKey, partitions);
+                }
+            });
         }
     }
 
@@ -276,7 +277,21 @@ public class DefaultTbRuleEngineConsumerService extends AbstractConsumerService<
     }
 
     void launchConsumer(TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineMsg>> consumer, Queue configuration, TbRuleEngineConsumerStats stats, String threadSuffix) {
-        consumersExecutor.execute(() -> consumerLoop(consumer, configuration, stats, threadSuffix));
+        if (isReady) {
+            consumersExecutor.execute(() -> consumerLoop(consumer, configuration, stats, threadSuffix));
+        } else {
+            scheduleLaunchConsumer(consumer, configuration, stats, threadSuffix);
+        }
+    }
+
+    private void scheduleLaunchConsumer(TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineMsg>> consumer, Queue configuration, TbRuleEngineConsumerStats stats, String threadSuffix) {
+        repartitionExecutor.schedule(() -> {
+            if (isReady) {
+                consumersExecutor.execute(() -> consumerLoop(consumer, configuration, stats, threadSuffix));
+            } else {
+                scheduleLaunchConsumer(consumer, configuration, stats, threadSuffix);
+            }
+        }, 10, TimeUnit.SECONDS);
     }
 
     void consumerLoop(TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineMsg>> consumer, org.thingsboard.server.common.data.queue.Queue configuration, TbRuleEngineConsumerStats stats, String threadSuffix) {

@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.TenantProfile;
-import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.id.QueueId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.queue.Queue;
@@ -66,8 +65,6 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
         } else {
             onQueueUpdated(savedQueue, oldQueue);
         }
-
-        notificationEntityService.notifySendMsgToEdgeService(queue.getTenantId(), savedQueue.getId(), create ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
 
         return savedQueue;
     }
@@ -124,7 +121,6 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
     private void onQueueDeleted(Queue queue) {
         tbClusterService.onQueueDelete(queue);
 //        queueStatsService.deleteQueueStatsByQueueId(tenantId, queueId);
-        notificationEntityService.notifySendMsgToEdgeService(queue.getTenantId(), queue.getId(), EdgeEventActionType.DELETED);
     }
 
     @Override
