@@ -32,6 +32,7 @@ import org.thingsboard.server.common.adaptor.AdaptorException;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.adaptor.ProtoConverter;
 import org.thingsboard.server.gen.transport.TransportProtos;
+import org.thingsboard.server.gen.transport.TransportApiProtos;
 import org.thingsboard.server.transport.coap.CoapTransportResource;
 
 import java.util.Optional;
@@ -45,7 +46,8 @@ public class ProtoCoapAdaptor implements CoapTransportAdaptor {
     public TransportProtos.PostTelemetryMsg convertToPostTelemetry(UUID sessionId, Request inbound, Descriptors.Descriptor telemetryMsgDescriptor) throws AdaptorException {
         ProtoConverter.validateDescriptor(telemetryMsgDescriptor);
         try {
-            return JsonConverter.convertToTelemetryProto(JsonParser.parseString(ProtoConverter.dynamicMsgToJson(inbound.getPayload(), telemetryMsgDescriptor)));
+            var jsonMessage = JsonParser.parseString(ProtoConverter.dynamicMsgToJson(inbound.getPayload(), telemetryMsgDescriptor));
+            return JsonConverter.convertToTelemetryProto(CoapAdaptorUtils.convertProtoJsonTelemetry(jsonMessage));
         } catch (Exception e) {
             throw new AdaptorException(e);
         }
@@ -143,8 +145,9 @@ public class ProtoCoapAdaptor implements CoapTransportAdaptor {
             if (msg.getClientAttributeListCount() == 0 && msg.getSharedAttributeListCount() == 0) {
                 return new Response(CoAP.ResponseCode.NOT_FOUND);
             } else {
+                TransportApiProtos.AttributesResponse responseMsg = ProtoConverter.convertToAttributesResponse(msg);
                 Response response = new Response(CoAP.ResponseCode.CONTENT);
-                response.setPayload(msg.toByteArray());
+                response.setPayload(responseMsg.toByteArray());
                 return response;
             }
         }

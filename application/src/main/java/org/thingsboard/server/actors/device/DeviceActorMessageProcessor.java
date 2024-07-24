@@ -565,17 +565,13 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         ListenableFuture<List<AttributeKvEntry>> clientAttributesFuture;
         ListenableFuture<List<AttributeKvEntry>> sharedAttributesFuture;
         if (CollectionUtils.isEmpty(request.getClientAttributeNamesList()) && CollectionUtils.isEmpty(request.getSharedAttributeNamesList())) {
+            // if not a single attribute name is given return all attributes of both client and shared scope
             clientAttributesFuture = findAllAttributesByScope(AttributeScope.CLIENT_SCOPE);
             sharedAttributesFuture = findAllAttributesByScope(AttributeScope.SHARED_SCOPE);
-        } else if (!CollectionUtils.isEmpty(request.getClientAttributeNamesList()) && !CollectionUtils.isEmpty(request.getSharedAttributeNamesList())) {
+        } else  {
+            // if any attribute name is given handle client and shared scope independently
             clientAttributesFuture = findAttributesByScope(toSet(request.getClientAttributeNamesList()), AttributeScope.CLIENT_SCOPE);
             sharedAttributesFuture = findAttributesByScope(toSet(request.getSharedAttributeNamesList()), AttributeScope.SHARED_SCOPE);
-        } else if (CollectionUtils.isEmpty(request.getClientAttributeNamesList()) && !CollectionUtils.isEmpty(request.getSharedAttributeNamesList())) {
-            clientAttributesFuture = Futures.immediateFuture(Collections.emptyList());
-            sharedAttributesFuture = findAttributesByScope(toSet(request.getSharedAttributeNamesList()), AttributeScope.SHARED_SCOPE);
-        } else {
-            sharedAttributesFuture = Futures.immediateFuture(Collections.emptyList());
-            clientAttributesFuture = findAttributesByScope(toSet(request.getClientAttributeNamesList()), AttributeScope.CLIENT_SCOPE);
         }
         return Futures.allAsList(Arrays.asList(clientAttributesFuture, sharedAttributesFuture));
     }
@@ -584,7 +580,16 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         return systemContext.getAttributesService().findAll(tenantId, deviceId, scope);
     }
 
+    /**
+     * Find attributes by name and scope. Allows "*" as a wildcard to fetch all attributes for the given scope.
+     */
     private ListenableFuture<List<AttributeKvEntry>> findAttributesByScope(Set<String> attributesSet, AttributeScope scope) {
+        if (attributesSet.isEmpty()) {
+            return Futures.immediateFuture(Collections.emptyList());
+        }
+        if (attributesSet.size() == 1 && attributesSet.contains("*")) {
+            return findAllAttributesByScope(scope);
+        }
         return systemContext.getAttributesService().find(tenantId, deviceId, scope, attributesSet);
     }
 
