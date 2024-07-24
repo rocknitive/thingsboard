@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2023 The Thingsboard Authors
+/// Copyright © 2016-2024 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -86,6 +86,9 @@ export class AggregatedDataKeyRowComponent implements ControlValueAccessor, OnIn
 
   @Input()
   keyName: string;
+
+  @Input()
+  index: number;
 
   @Output()
   keyRemoved = new EventEmitter();
@@ -225,6 +228,7 @@ export class AggregatedDataKeyRowComponent implements ControlValueAccessor, OnIn
         this.keyRowFormGroup.get('units').patchValue(this.modelValue.units, {emitEvent: false});
         this.keyRowFormGroup.get('decimals').patchValue(this.modelValue.decimals, {emitEvent: false});
         this.updateModel();
+        this.cd.markForCheck();
       }
     });
   }

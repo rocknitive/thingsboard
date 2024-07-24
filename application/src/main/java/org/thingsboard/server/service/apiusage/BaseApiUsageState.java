@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2023 The Thingsboard Authors
+ * Copyright © 2016-2024 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,8 @@ public abstract class BaseApiUsageState {
                 return apiUsageState.getDbStorageState();
             case JS:
                 return apiUsageState.getJsExecState();
+            case TBEL:
+                return apiUsageState.getTbelExecState();
             case EMAIL:
                 return apiUsageState.getEmailExecState();
             case SMS:
@@ -171,6 +173,9 @@ public abstract class BaseApiUsageState {
             case JS:
                 apiUsageState.setJsExecState(value);
                 break;
+            case TBEL:
+                apiUsageState.setTbelExecState(value);
+                break;
             case EMAIL:
                 apiUsageState.setEmailExecState(value);
                 break;
@@ -192,6 +197,16 @@ public abstract class BaseApiUsageState {
 
     public EntityId getEntityId() {
         return getApiUsageState().getEntityId();
+    }
+
+    @Override
+    public String toString() {
+        return "BaseApiUsageState{" +
+                "apiUsageState=" + apiUsageState +
+                ", currentCycleTs=" + currentCycleTs +
+                ", nextCycleTs=" + nextCycleTs +
+                ", currentHourTs=" + currentHourTs +
+                '}';
     }
 
     @Data

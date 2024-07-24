@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2023 The Thingsboard Authors
+ * Copyright © 2016-2024 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
     private long maxRuleChains;
     private long maxResourcesInBytes;
     private long maxOtaPackagesInBytes;
+    private long maxResourceSize;
 
     private String transportTenantMsgRateLimit;
     private String transportTenantTelemetryMsgRateLimit;
@@ -46,6 +47,12 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
     private String transportDeviceMsgRateLimit;
     private String transportDeviceTelemetryMsgRateLimit;
     private String transportDeviceTelemetryDataPointsRateLimit;
+    private String transportGatewayMsgRateLimit;
+    private String transportGatewayTelemetryMsgRateLimit;
+    private String transportGatewayTelemetryDataPointsRateLimit;
+    private String transportGatewayDeviceMsgRateLimit;
+    private String transportGatewayDeviceTelemetryMsgRateLimit;
+    private String transportGatewayDeviceTelemetryDataPointsRateLimit;
 
     private String tenantEntityExportRateLimit;
     private String tenantEntityImportRateLimit;
@@ -56,6 +63,7 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
     private long maxTransportDataPoints;
     private long maxREExecutions;
     private long maxJSExecutions;
+    private long maxTbelExecutions;
     private long maxDPStorageDays;
     private int maxRuleNodeExecutionsPerMessage;
     private long maxEmails;
@@ -79,9 +87,16 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
 
     private String cassandraQueryTenantRateLimitsConfiguration;
 
+    private String edgeEventRateLimits;
+    private String edgeEventRateLimitsPerEdge;
+    private String edgeUplinkMessagesRateLimits;
+    private String edgeUplinkMessagesRateLimitsPerEdge;
+
     private int defaultStorageTtlDays;
     private int alarmsTtlDays;
     private int rpcTtlDays;
+    private int queueStatsTtlDays;
+    private int ruleEngineExceptionsTtlDays;
 
     private double warnThreshold;
 
@@ -94,6 +109,8 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
                 return maxTransportDataPoints;
             case JS_EXEC_COUNT:
                 return maxJSExecutions;
+            case TBEL_EXEC_COUNT:
+                return maxTbelExecutions;
             case RE_EXEC_COUNT:
                 return maxREExecutions;
             case STORAGE_DP_COUNT:
