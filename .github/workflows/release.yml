@@ -16,6 +16,9 @@ jobs:
       packages: write
 
     steps:
+      - name: Free up some disk space on the Github runner
+        run: du -hs /opt/hostedtoolcache; rm -rf /opt/hostedtoolcache
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
