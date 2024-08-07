@@ -55,7 +55,7 @@ jobs:
         run: mv thingsboard.deb thingsboard-${{env.TAG_VERSION}}.deb
 
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: ${{github.workspace}}/application/target/thingsboard-${{env.TAG_VERSION}}.deb
