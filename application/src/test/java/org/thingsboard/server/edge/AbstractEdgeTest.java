@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2024 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.thingsboard.server.edge;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -27,7 +28,6 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.thingsboard.common.util.JacksonUtil;
-import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.AdminSettings;
 import org.thingsboard.server.common.data.Customer;
 import org.thingsboard.server.common.data.Dashboard;
@@ -44,6 +44,7 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.alarm.AlarmSeverity;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.asset.AssetProfile;
+import org.thingsboard.server.common.data.debug.DebugSettings;
 import org.thingsboard.server.common.data.device.profile.AlarmCondition;
 import org.thingsboard.server.common.data.device.profile.AlarmConditionFilter;
 import org.thingsboard.server.common.data.device.profile.AlarmConditionFilterKey;
@@ -63,7 +64,6 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.oauth2.OAuth2Info;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
@@ -75,6 +75,7 @@ import org.thingsboard.server.common.data.queue.Queue;
 import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainMetaData;
 import org.thingsboard.server.common.data.rule.RuleChainType;
+import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.model.JwtSettings;
 import org.thingsboard.server.controller.AbstractControllerTest;
 import org.thingsboard.server.dao.edge.EdgeEventService;
@@ -83,19 +84,20 @@ import org.thingsboard.server.gen.edge.v1.AdminSettingsUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.AssetProfileUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.AssetUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.CustomerUpdateMsg;
+import org.thingsboard.server.gen.edge.v1.DeviceCredentialsUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.DeviceProfileUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.DeviceUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.EdgeConfiguration;
-import org.thingsboard.server.gen.edge.v1.OAuth2UpdateMsg;
+import org.thingsboard.server.gen.edge.v1.OAuth2ClientUpdateMsg;
+import org.thingsboard.server.gen.edge.v1.OAuth2DomainUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.QueueUpdateMsg;
-import org.thingsboard.server.gen.edge.v1.RuleChainMetadataRequestMsg;
 import org.thingsboard.server.gen.edge.v1.RuleChainMetadataUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.RuleChainUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.SyncCompletedMsg;
 import org.thingsboard.server.gen.edge.v1.TenantProfileUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.TenantUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.UpdateMsgType;
-import org.thingsboard.server.gen.edge.v1.UplinkMsg;
+import org.thingsboard.server.gen.edge.v1.UserCredentialsUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.UserUpdateMsg;
 
 import java.util.ArrayList;
@@ -114,7 +116,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @Slf4j
 abstract public class AbstractEdgeTest extends AbstractControllerTest {
-
+    public static final Integer CONNECT_MESSAGE_COUNT = 17;
+    public static final Integer INSTALLATION_MESSAGE_COUNT = 8;
+    public static final Integer SYNC_MESSAGE_COUNT = CONNECT_MESSAGE_COUNT + INSTALLATION_MESSAGE_COUNT;
     private static final String THERMOSTAT_DEVICE_PROFILE_NAME = "Thermostat";
 
     protected DeviceProfile thermostatDeviceProfile;
@@ -124,9 +128,6 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
 
     @Autowired
     protected EdgeEventService edgeEventService;
-
-    @Autowired
-    protected TbClusterService clusterService;
 
     @Before
     public void setupEdgeTest() throws Exception {
@@ -138,40 +139,17 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         doPost("/api/admin/jwtSettings", settings).andExpect(status().isOk());
 
         loginTenantAdmin();
-
+        //8 installation messages
         installation();
 
         edgeImitator = new EdgeImitator("localhost", 7070, edge.getRoutingKey(), edge.getSecret());
-        edgeImitator.ignoreType(OAuth2UpdateMsg.class);
-        edgeImitator.expectMessageAmount(21);
+        // 17 connect messages + 8 installation messages
+        edgeImitator.expectMessageAmount(SYNC_MESSAGE_COUNT);
+        edgeImitator.ignoreType(OAuth2ClientUpdateMsg.class);
+        edgeImitator.ignoreType(OAuth2DomainUpdateMsg.class);
         edgeImitator.connect();
 
-        requestEdgeRuleChainMetadata();
-
         verifyEdgeConnectionAndInitialData();
-    }
-
-    private void requestEdgeRuleChainMetadata() throws Exception {
-        RuleChainId rootRuleChainId = getEdgeRootRuleChainId();
-        RuleChainMetadataRequestMsg.Builder builder = RuleChainMetadataRequestMsg.newBuilder()
-                .setRuleChainIdMSB(rootRuleChainId.getId().getMostSignificantBits())
-                .setRuleChainIdLSB(rootRuleChainId.getId().getLeastSignificantBits());
-        testAutoGeneratedCodeByProtobuf(builder);
-        UplinkMsg.Builder uplinkMsgBuilder = UplinkMsg.newBuilder()
-                .addRuleChainMetadataRequestMsg(builder.build());
-        edgeImitator.sendUplinkMsg(uplinkMsgBuilder.build());
-    }
-
-    private RuleChainId getEdgeRootRuleChainId() throws Exception {
-        List<RuleChain> edgeRuleChains = doGetTypedWithPageLink("/api/edge/" + edge.getUuidId() + "/ruleChains?",
-                new TypeReference<PageData<RuleChain>>() {
-                }, new PageLink(100)).getData();
-        for (RuleChain edgeRuleChain : edgeRuleChains) {
-            if (edgeRuleChain.isRoot()) {
-                return edgeRuleChain.getId();
-            }
-        }
-        throw new RuntimeException("Root rule chain not found");
     }
 
     @After
@@ -190,21 +168,57 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         thermostatDeviceProfile = this.createDeviceProfile(THERMOSTAT_DEVICE_PROFILE_NAME,
                 createMqttDeviceProfileTransportConfiguration(new JsonTransportPayloadConfiguration(), false));
         extendDeviceProfileData(thermostatDeviceProfile);
+        //2 messages DeviceProfile
         thermostatDeviceProfile = doPost("/api/deviceProfile", thermostatDeviceProfile, DeviceProfile.class);
 
         Device savedDevice = saveDevice("Edge Device 1", THERMOSTAT_DEVICE_PROFILE_NAME);
 
+        // create public customer
+        //1 message
+        // Customer
+        doPost("/api/customer/public/device/" + savedDevice.getId().getId(), Device.class);
+        doDelete("/api/customer/device/" + savedDevice.getId().getId(), Device.class);
+
+
         Asset savedAsset = saveAsset("Edge Asset 1");
+        updateRootRuleChainMetadata();
 
         edge = doPost("/api/edge", constructEdge("Test Edge", "test"), Edge.class);
 
+        //3 messages
+        // Device
+        // DeviceProfile
+        // DeviceCredentials
         doPost("/api/edge/" + edge.getUuidId()
                 + "/device/" + savedDevice.getUuidId(), Device.class);
+        //2 messages
+        // Asset
+        // AssetProfile
         doPost("/api/edge/" + edge.getUuidId()
                 + "/asset/" + savedAsset.getUuidId(), Asset.class);
 
         // wait until assign device and asset events are fully processed by edge notification service
-        TimeUnit.MILLISECONDS.sleep(500);
+        TimeUnit.MILLISECONDS.sleep(1000);
+    }
+
+    protected void updateRootRuleChainMetadata() throws Exception {
+        RuleChainId rootRuleChainId = getEdgeRootRuleChainId();
+        RuleChainMetaData rootRuleChainMetadata = doGet("/api/ruleChain/" + rootRuleChainId.getId().toString() + "/metadata", RuleChainMetaData.class);
+        rootRuleChainMetadata.getNodes().forEach(n -> n.setDebugSettings(DebugSettings.all()));
+        doPost("/api/ruleChain/metadata", rootRuleChainMetadata, RuleChainMetaData.class);
+    }
+
+    private RuleChainId getEdgeRootRuleChainId() throws Exception {
+        List<RuleChain> edgeRuleChains = doGetTypedWithPageLink("/api/ruleChains?type={type}&",
+                new TypeReference<PageData<RuleChain>>() {},
+                new PageLink(100, 0, "Edge Root Rule Chain"),
+                "EDGE").getData();
+        for (RuleChain edgeRuleChain : edgeRuleChains) {
+            if (edgeRuleChain.isRoot()) {
+                return edgeRuleChain.getId();
+            }
+        }
+        throw new RuntimeException("Root rule chain not found");
     }
 
     protected void extendDeviceProfileData(DeviceProfile deviceProfile) {
@@ -249,7 +263,7 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         validateMsgsCnt(RuleChainUpdateMsg.class, 1);
         UUID ruleChainUUID = validateRuleChains();
 
-        // 1 from request message
+        // 1 from rule chain fetcher
         validateMsgsCnt(RuleChainMetadataUpdateMsg.class, 1);
         validateRuleChainMetadataUpdates(ruleChainUUID);
 
@@ -259,10 +273,10 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
 
         // 4 messages
         // - 1 from default profile fetcher
-        // - 2 from device profile fetcher (default and thermostat)
+        // - 4 from device profile fetcher (2 * (default and thermostat) before and after ota packages fetcher
         // - 1 from device fetcher
-        validateMsgsCnt(DeviceProfileUpdateMsg.class, 4);
-        validateDeviceProfiles(4);
+        validateMsgsCnt(DeviceProfileUpdateMsg.class, 6);
+        validateDeviceProfiles(6);
 
         // 3 messages
         // - 1 from default profile fetcher
@@ -275,6 +289,8 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         validateMsgsCnt(DeviceUpdateMsg.class, 1);
         validateDevices();
 
+        validateMsgsCnt(DeviceCredentialsUpdateMsg.class, 1);
+
         // 1 from asset fetcher
         validateMsgsCnt(AssetUpdateMsg.class, 1);
         validateAssets();
@@ -286,6 +302,8 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         // 1 message from user fetcher
         validateMsgsCnt(UserUpdateMsg.class, 1);
         validateUsers();
+
+        validateMsgsCnt(UserCredentialsUpdateMsg.class, 1);
 
         // 1 from tenant fetcher
         validateMsgsCnt(TenantUpdateMsg.class, 1);
@@ -428,12 +446,11 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
     }
 
     private void validateRuleChainMetadataUpdates(UUID expectedRuleChainUUID) {
-        Optional<RuleChainMetadataUpdateMsg> ruleChainMetadataUpdateOpt = edgeImitator.findMessageByType(RuleChainMetadataUpdateMsg.class);
-        Assert.assertTrue(ruleChainMetadataUpdateOpt.isPresent());
-        RuleChainMetadataUpdateMsg ruleChainMetadataUpdateMsg = ruleChainMetadataUpdateOpt.get();
+        Optional<RuleChainMetadataUpdateMsg> ruleChainMetadataUpdateMsgOpt = edgeImitator.findMessageByType(RuleChainMetadataUpdateMsg.class);
+        Assert.assertTrue(ruleChainMetadataUpdateMsgOpt.isPresent());
+        RuleChainMetadataUpdateMsg ruleChainMetadataUpdateMsg = ruleChainMetadataUpdateMsgOpt.get();
         Assert.assertEquals(UpdateMsgType.ENTITY_CREATED_RPC_MESSAGE, ruleChainMetadataUpdateMsg.getMsgType());
         RuleChainMetaData ruleChainMetaData = JacksonUtil.fromString(ruleChainMetadataUpdateMsg.getEntity(), RuleChainMetaData.class, true);
-        Assert.assertNotNull(ruleChainMetaData);
         Assert.assertEquals(expectedRuleChainUUID, ruleChainMetaData.getRuleChainId().getId());
     }
 
@@ -541,18 +558,6 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         Assert.assertTrue(customer.isPublic());
     }
 
-    private void validateOAuth2() throws Exception {
-        Optional<OAuth2UpdateMsg> oAuth2UpdateMsgOpt = edgeImitator.findMessageByType(OAuth2UpdateMsg.class);
-        Assert.assertTrue(oAuth2UpdateMsgOpt.isPresent());
-        OAuth2UpdateMsg oAuth2UpdateMsg = oAuth2UpdateMsgOpt.get();
-        OAuth2Info oAuth2Info = JacksonUtil.fromString(oAuth2UpdateMsg.getEntity(), OAuth2Info.class, true);
-        Assert.assertNotNull(oAuth2Info);
-        OAuth2Info auth2Info = doGet("/api/oauth2/config", OAuth2Info.class);
-        Assert.assertNotNull(auth2Info);
-        Assert.assertEquals(oAuth2Info, auth2Info);
-        testAutoGeneratedCodeByProtobuf(oAuth2UpdateMsg);
-    }
-
     private void validateSyncCompleted() {
         Optional<SyncCompletedMsg> syncCompletedMsgOpt = edgeImitator.findMessageByType(SyncCompletedMsg.class);
         Assert.assertTrue(syncCompletedMsgOpt.isPresent());
@@ -561,7 +566,8 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
     protected Device saveDeviceOnCloudAndVerifyDeliveryToEdge() throws Exception {
         // create device and assign to edge
         Device savedDevice = saveDevice(StringUtils.randomAlphanumeric(15), thermostatDeviceProfile.getName());
-        edgeImitator.expectMessageAmount(2); // device and device profile messages
+        DeviceCredentials deviceCredentials = doGet("/api/device/" + savedDevice.getId().getId() + "/credentials", DeviceCredentials.class);
+        edgeImitator.expectMessageAmount(3); // device and device profile messages and device credentials
         doPost("/api/edge/" + edge.getUuidId()
                 + "/device/" + savedDevice.getUuidId(), Device.class);
         Assert.assertTrue(edgeImitator.waitForMessages());
@@ -578,6 +584,15 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         Assert.assertEquals(UpdateMsgType.ENTITY_CREATED_RPC_MESSAGE, deviceProfileUpdateMsg.getMsgType());
         Assert.assertEquals(thermostatDeviceProfile.getUuidId().getMostSignificantBits(), deviceProfileUpdateMsg.getIdMSB());
         Assert.assertEquals(thermostatDeviceProfile.getUuidId().getLeastSignificantBits(), deviceProfileUpdateMsg.getIdLSB());
+
+        Optional<DeviceCredentialsUpdateMsg> deviceCredentialsUpdateMsgOpt = edgeImitator.findMessageByType(DeviceCredentialsUpdateMsg.class);
+        Assert.assertTrue(deviceCredentialsUpdateMsgOpt.isPresent());
+        DeviceCredentialsUpdateMsg deviceCredentialsUpdateMsg = deviceCredentialsUpdateMsgOpt.get();
+        DeviceCredentials deviceCredentialsMsg = JacksonUtil.fromString(deviceCredentialsUpdateMsg.getEntity(), DeviceCredentials.class, true);
+        Assert.assertNotNull(deviceCredentialsMsg);
+        Assert.assertEquals(savedDevice.getId(), deviceCredentialsMsg.getDeviceId());
+        Assert.assertEquals(deviceCredentials, deviceCredentialsMsg);
+
         return savedDevice;
     }
 
@@ -658,7 +673,7 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
     }
 
     protected RuleChainId createEdgeRuleChainAndAssignToEdge(String ruleChainName) throws Exception {
-        edgeImitator.expectMessageAmount(1);
+        edgeImitator.expectMessageAmount(2);
         RuleChain ruleChain = new RuleChain();
         ruleChain.setName(ruleChainName);
         ruleChain.setType(RuleChainType.EDGE);
@@ -700,6 +715,27 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
         // delete dashboard
         doDelete("/api/dashboard/" + dashboardId.getId())
                 .andExpect(status().isOk());
+    }
+
+
+    protected ObjectNode createDefaultRpc() {
+        return createDefaultRpc(1);
+    }
+
+    protected ObjectNode createDefaultRpc(Integer value) {
+        ObjectNode rpc = JacksonUtil.newObjectNode();
+        rpc.put("method", "setGpio");
+
+        ObjectNode params = JacksonUtil.newObjectNode();
+
+        params.put("pin", 7);
+        params.put("value", value);
+
+        rpc.set("params", params);
+        rpc.put("persistent", true);
+        rpc.put("timeout", 5000);
+
+        return rpc;
     }
 
 }

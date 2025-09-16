@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2024 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import delight.nashornsandbox.NashornSandbox;
 import delight.nashornsandbox.NashornSandboxes;
+import delight.nashornsandbox.exceptions.ScriptCPUAbuseException;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,8 +34,6 @@ import org.thingsboard.script.api.TbScriptException;
 import org.thingsboard.server.common.stats.TbApiUsageReportClient;
 import org.thingsboard.server.common.stats.TbApiUsageStateClient;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -153,8 +154,12 @@ public class NashornJsInvokeService extends AbstractJsInvokeService {
                 }
                 scriptInfoMap.put(scriptId, scriptInfo);
                 return scriptId;
-            } catch (Exception e) {
+            } catch (ScriptException e) {
                 throw new TbScriptException(scriptId, TbScriptException.ErrorCode.COMPILATION, jsScript, e);
+            } catch (ScriptCPUAbuseException e) {
+                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.TIMEOUT, jsScript, e);
+            } catch (Exception e) {
+                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, jsScript, e);
             }
         });
     }

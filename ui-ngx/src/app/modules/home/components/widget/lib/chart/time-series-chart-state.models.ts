@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2024 The Thingsboard Authors
+/// Copyright © 2016-2025 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ import {
   TimeSeriesChartStateSettings,
   TimeSeriesChartStateSourceType,
   TimeSeriesChartTicksFormatter,
-  TimeSeriesChartTicksGenerator,
-  TimeSeriesChartTooltipValueFormatFunction
+  TimeSeriesChartTicksGenerator
 } from '@home/components/widget/lib/chart/time-series-chart.models';
 import { UtilsService } from '@core/services/utils.service';
 import { FormattedData } from '@shared/models/widget.models';
 import { formatValue, isDefinedAndNotNull, isNumber, isNumeric } from '@core/utils';
 import { LabelFormatterCallback } from 'echarts';
+import {
+  TimeSeriesChartTooltipValueFormatFunction
+} from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 
 export class TimeSeriesChartStateValueConverter {
 

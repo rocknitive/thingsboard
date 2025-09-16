@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2024 The Thingsboard Authors
+/// Copyright © 2016-2025 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import {
   TimeSeriesChartSeriesType,
   TimeSeriesChartSettings,
   TimeSeriesChartThreshold,
-  TimeSeriesChartTooltipWidgetSettings,
   TimeSeriesChartXAxisSettings,
   TimeSeriesChartYAxisSettings
 } from '@home/components/widget/lib/chart/time-series-chart.models';
@@ -48,6 +47,9 @@ import {
   ChartFillSettings,
   ChartFillType
 } from '@home/components/widget/lib/chart/chart.models';
+import {
+  TimeSeriesChartTooltipWidgetSettings
+} from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 
 export interface BarChartWithLabelsWidgetSettings extends TimeSeriesChartTooltipWidgetSettings {
   dataZoom: boolean;

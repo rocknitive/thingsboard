@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2024 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ import java.util.Map;
                 "and current value for this key from the incoming message",
         nodeDetails = "Useful for metering use cases, when you need to calculate consumption based on pulse counter reading.<br><br>" +
                 "Output connections: <code>Success</code>, <code>Other</code> or <code>Failure</code>.",
-        uiResources = {"static/rulenode/rulenode-core-config.js"},
         configDirective = "tbEnrichmentNodeCalculateDeltaConfig")
 public class CalculateDeltaNode implements TbNode {
 
@@ -175,14 +174,19 @@ public class CalculateDeltaNode implements TbNode {
                 long period = previousData != null ? msg.getMetaDataTs() - previousData.ts : 0;
                 json.put(config.getPeriodValueKey(), period);
             }
-            return TbMsg.transformMsgData(msg, JacksonUtil.toString(json));
+            return msg.transform()
+                    .data(JacksonUtil.toString(json))
+                    .build();
         }, MoreExecutors.directExecutor());
     }
 
     private ListenableFuture<ValueWithTs> getLatestFromCacheOrFetchFromDb(TbContext ctx, TbMsg msg) {
         EntityId originator = msg.getOriginator();
-        ValueWithTs valueWithTs = cache.get(msg.getOriginator());
-        return valueWithTs != null ? Futures.immediateFuture(valueWithTs) : fetchLatestValueAsync(ctx, originator);
+        if (config.isUseCache()) {
+            ValueWithTs valueWithTs = cache.get(msg.getOriginator());
+            return valueWithTs != null ? Futures.immediateFuture(valueWithTs) : fetchLatestValueAsync(ctx, originator);
+        }
+        return fetchLatestValueAsync(ctx, originator);
     }
 
     private record ValueWithTs(long ts, double value) {

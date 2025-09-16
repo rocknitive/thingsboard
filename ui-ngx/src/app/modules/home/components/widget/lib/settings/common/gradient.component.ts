@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2024 The Thingsboard Authors
+/// Copyright © 2016-2025 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import { IAliasController } from '@core/api/widget-api.models';
 import { DomSanitizer } from '@angular/platform-browser';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { isDefinedAndNotNull } from '@core/utils';
-import { DataKeysCallbacks } from '@home/components/widget/config/data-keys.component.models';
+import { DataKeysCallbacks } from '@home/components/widget/lib/settings/common/key/data-keys.component.models';
 import { Datasource } from '@shared/models/widget.models';
 
 @Component({
@@ -141,8 +141,8 @@ export class GradientComponent implements OnInit, ControlValueAccessor, OnDestro
   writeValue(value: ColorGradientSettings): void {
     if (isDefinedAndNotNull(value)) {
       this.gradientFormGroup.get('advancedMode').patchValue(value.advancedMode, {emitEvent: false});
-      this.gradientFormGroup.get('minValue').patchValue(isFinite(value.minValue) ? value.minValue : this.minValue, {emitEvent: false});
-      this.gradientFormGroup.get('maxValue').patchValue(isFinite(value.maxValue) ? value.maxValue : this.maxValue, {emitEvent: false});
+      this.gradientFormGroup.get('minValue').patchValue(isFinite(this.minValue) ? this.minValue : value.minValue, {emitEvent: false});
+      this.gradientFormGroup.get('maxValue').patchValue(isFinite(this.maxValue) ? this.maxValue : value.maxValue, {emitEvent: false});
       if (value?.gradient?.length) {
         this.gradientFormGroup.get('gradient').get('start').patchValue(value.gradient[0], {emitEvent: false});
         this.gradientFormGroup.get('gradient').get('end').patchValue(value.gradient[value.gradient.length - 1], {emitEvent: false});

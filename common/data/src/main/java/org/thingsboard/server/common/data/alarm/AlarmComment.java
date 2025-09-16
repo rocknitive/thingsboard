@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2024 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,21 @@ import org.thingsboard.server.common.data.BaseData;
 import org.thingsboard.server.common.data.HasName;
 import org.thingsboard.server.common.data.id.AlarmCommentId;
 import org.thingsboard.server.common.data.id.AlarmId;
-import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.validation.Length;
 import org.thingsboard.server.common.data.validation.NoXss;
+
+import java.io.Serial;
 
 @Schema
 @Data
 @Builder
 @AllArgsConstructor
 public class AlarmComment extends BaseData<AlarmCommentId> implements HasName {
+
+    @Serial
+    private static final long serialVersionUID = -5454905526404017592L;
+
     @Schema(description = "JSON object with Alarm id.", accessMode = Schema.AccessMode.READ_ONLY)
     private AlarmId alarmId;
     @Schema(description = "JSON object with User id.", accessMode = Schema.AccessMode.READ_ONLY)
@@ -86,4 +91,5 @@ public class AlarmComment extends BaseData<AlarmCommentId> implements HasName {
         this.comment = alarmComment.getComment();
         this.userId = alarmComment.getUserId();
     }
+
 }
