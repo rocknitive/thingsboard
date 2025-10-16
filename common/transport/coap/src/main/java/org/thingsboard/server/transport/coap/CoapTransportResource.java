@@ -482,7 +482,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
             X509Certificate x509Certificate = (X509Certificate) certPath.getPath().getCertificates().get(0);
             return Base64.getEncoder().encodeToString(x509Certificate.getEncoded());
         } catch (Exception e) {
-            log.error("Failed to get cert PEM: [{}]", endpointContext.getPeerAddress(), e);
+            log.trace("Failed to get cert PEM: [{}]", endpointContext.getPeerAddress(), e);
             return null;
         }
     }
