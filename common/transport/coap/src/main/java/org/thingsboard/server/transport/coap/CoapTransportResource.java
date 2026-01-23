@@ -253,7 +253,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostAttributes(sessionId, request,
                         clientState.getConfiguration().getAttributesMsgDescriptor()),
-                new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
+                new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.VALID, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     private void handlePostTelemetryRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
@@ -261,7 +261,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostTelemetry(sessionId, request,
                         clientState.getConfiguration().getTelemetryMsgDescriptor()),
-                new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
+                new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.VALID, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     private void handleClaimRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
@@ -406,7 +406,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
 
         @Override
         public void onSuccess(TransportProtos.ProvisionDeviceResponseMsg msg) {
-            CoAP.ResponseCode responseCode = CoAP.ResponseCode.CREATED;
+            CoAP.ResponseCode responseCode = CoAP.ResponseCode.CONTENT;
             if (!msg.getStatus().equals(TransportProtos.ResponseStatus.SUCCESS)) {
                 responseCode = CoAP.ResponseCode.BAD_REQUEST;
             }
@@ -482,9 +482,8 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
             X509Certificate x509Certificate = (X509Certificate) certPath.getPath().getCertificates().get(0);
             return Base64.getEncoder().encodeToString(x509Certificate.getEncoded());
         } catch (Exception e) {
-            log.error("Failed to get cert PEM: [{}]", endpointContext.getPeerAddress(), e);
+            log.trace("Failed to get cert PEM: [{}]", endpointContext.getPeerAddress(), e);
             return null;
         }
     }
 }
-

@@ -205,26 +205,27 @@ public class JsonConverter {
         return result;
     }
 
-    private static void parseObject(PostTelemetryMsg.Builder builder, long systemTs, JsonObject jo) {
+    public static long getTs(long systemTs, JsonElement tsElement) {
+        if (tsElement.isJsonNull()) {
+            return systemTs;
+        }
+        var ts = tsElement.getAsLong();
+        return ts == 0 ? systemTs : ts;
+    }
+
+    private static void parseObject(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(builder, jo);
+            request.addTsKvList(buildTsKvList(getTs(systemTs, jo.get("ts")), jo.get("values").getAsJsonObject()));
         } else {
-            parseWithoutTs(builder, systemTs, jo);
+            request.addTsKvList(buildTsKvList(systemTs, jo));
         }
     }
 
-    private static void parseWithoutTs(PostTelemetryMsg.Builder request, long systemTs, JsonObject jo) {
+    private static TsKvListProto buildTsKvList(long ts, JsonObject jo) {
         TsKvListProto.Builder builder = TsKvListProto.newBuilder();
-        builder.setTs(systemTs);
+        builder.setTs(ts);
         builder.addAllKv(parseProtoValues(jo));
-        request.addTsKvList(builder.build());
-    }
-
-    private static void parseWithTs(PostTelemetryMsg.Builder request, JsonObject jo) {
-        TsKvListProto.Builder builder = TsKvListProto.newBuilder();
-        builder.setTs(jo.get("ts").getAsLong());
-        builder.addAllKv(parseProtoValues(jo.get("values").getAsJsonObject()));
-        request.addTsKvList(builder.build());
+        return builder.build();
     }
 
     private static List<KeyValueProto> parseProtoValues(JsonObject valuesObject) {
@@ -601,22 +602,14 @@ public class JsonConverter {
 
     private static void parseObject(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
         if (jo.has("ts") && jo.has("values")) {
-            parseWithTs(result, jo);
+            addEntries(result, getTs(systemTs, jo.get("ts")), jo.get("values").getAsJsonObject());
         } else {
-            parseWithoutTs(result, systemTs, jo);
+            addEntries(result, systemTs, jo);
         }
     }
 
-    private static void parseWithoutTs(Map<Long, List<KvEntry>> result, long systemTs, JsonObject jo) {
+    private static void addEntries(Map<Long, List<KvEntry>> result, long ts, JsonObject jo) {
         for (KvEntry entry : parseValues(jo)) {
-            result.computeIfAbsent(systemTs, tmp -> new ArrayList<>()).add(entry);
-        }
-    }
-
-    public static void parseWithTs(Map<Long, List<KvEntry>> result, JsonObject jo) {
-        long ts = jo.get("ts").getAsLong();
-        JsonObject valuesObject = jo.get("values").getAsJsonObject();
-        for (KvEntry entry : parseValues(valuesObject)) {
             result.computeIfAbsent(ts, tmp -> new ArrayList<>()).add(entry);
         }
     }
