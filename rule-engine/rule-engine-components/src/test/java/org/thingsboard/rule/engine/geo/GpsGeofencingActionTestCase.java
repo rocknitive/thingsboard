@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package org.thingsboard.rule.engine.geo;
 import lombok.Data;
 import org.thingsboard.server.common.data.id.EntityId;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Data
 public class GpsGeofencingActionTestCase {
 
     private EntityId entityId;
-    private Map<EntityId, EntityGeofencingState> entityStates;
+    private ConcurrentMap<EntityId, EntityGeofencingState> entityStates;
     private boolean msgInside;
     private boolean reportPresenceStatusOnEachMessage;
 
@@ -33,7 +33,8 @@ public class GpsGeofencingActionTestCase {
         this.entityId = entityId;
         this.msgInside = msgInside;
         this.reportPresenceStatusOnEachMessage = reportPresenceStatusOnEachMessage;
-        this.entityStates = new HashMap<>();
+        this.entityStates = new ConcurrentHashMap<>();
         this.entityStates.put(entityId, entityGeofencingState);
     }
+
 }

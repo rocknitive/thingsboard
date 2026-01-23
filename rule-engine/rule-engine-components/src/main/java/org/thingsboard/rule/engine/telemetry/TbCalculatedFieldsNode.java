@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 package org.thingsboard.rule.engine.telemetry;
 
 import com.google.gson.JsonParser;
-import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.rule.engine.api.AttributesSaveRequest;
 import org.thingsboard.rule.engine.api.EmptyNodeConfiguration;
 import org.thingsboard.rule.engine.api.RuleNode;
 import org.thingsboard.rule.engine.api.TbContext;
 import org.thingsboard.rule.engine.api.TbNode;
 import org.thingsboard.rule.engine.api.TbNodeConfiguration;
-import org.thingsboard.rule.engine.api.TbNodeException;
 import org.thingsboard.rule.engine.api.TimeseriesSaveRequest;
-import org.thingsboard.rule.engine.api.util.TbNodeUtils;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.AttributeScope;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.BasicTsKvEntry;
 import org.thingsboard.server.common.data.kv.KvEntry;
@@ -41,27 +39,23 @@ import java.util.Map;
 
 import static org.thingsboard.server.common.data.DataConstants.SCOPE;
 
-@Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "calculated fields",
+        name = "calculated fields and alarm rules",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Pushes incoming messages to calculated fields service",
-        nodeDetails = "Node enables the processing of calculated fields without persisting incoming messages to the database. " +
-                "By default, the processing of calculated fields is triggered by the <b>save attributes</b> and <b>save time series</b> nodes. " +
+        nodeDescription = "Pushes incoming messages to calculated fields and alarm rules services",
+        nodeDetails = "Node enables the processing of calculated fields and alarm rules without persisting incoming messages to the database. " +
+                "By default, the processing of calculated fields and alarm rules is triggered by the <b>save attributes</b> and <b>save time series</b> nodes. " +
                 "This rule node accepts the same messages as these nodes but allows you to trigger the processing of calculated " +
-                "fields independently, ensuring that derived data can be computed and utilized in real time without storing the original message in the database.",
+                "fields or alarm rules independently, ensuring that derived data can be computed and utilized in real time without storing the original message in the database.",
         configDirective = "tbNodeEmptyConfig",
-        icon = "published_with_changes"
+        icon = "published_with_changes",
+        docUrl = "https://thingsboard.io/docs/user-guide/rule-engine-2-0/nodes/action/calculated-fields/"
 )
 public class TbCalculatedFieldsNode implements TbNode {
 
-    private EmptyNodeConfiguration config;
-
     @Override
-    public void init(TbContext ctx, TbNodeConfiguration configuration) throws TbNodeException {
-        this.config = TbNodeUtils.convert(configuration, EmptyNodeConfiguration.class);
-    }
+    public void init(TbContext ctx, TbNodeConfiguration configuration) {}
 
     @Override
     public void onMsg(TbContext ctx, TbMsg msg) {
@@ -108,11 +102,15 @@ public class TbCalculatedFieldsNode implements TbNode {
             ctx.tellSuccess(msg);
             return;
         }
+        AttributeScope scope = resolveScope(ctx, msg);
+        if (scope == null) {
+            return;
+        }
 
         AttributesSaveRequest attributesSaveRequest = AttributesSaveRequest.builder()
                 .tenantId(ctx.getTenantId())
                 .entityId(msg.getOriginator())
-                .scope(AttributeScope.valueOf(msg.getMetaData().getValue(SCOPE)))
+                .scope(scope)
                 .entries(newAttributes)
                 .strategy(AttributesSaveRequest.Strategy.CF_ONLY)
                 .previousCalculatedFieldIds(msg.getPreviousCalculatedFieldIds())
@@ -121,6 +119,22 @@ public class TbCalculatedFieldsNode implements TbNode {
                 .callback(new TelemetryNodeCallback(ctx, msg))
                 .build();
         ctx.getTelemetryService().saveAttributes(attributesSaveRequest);
+    }
+
+    private AttributeScope resolveScope(TbContext ctx, TbMsg msg) {
+        String scopeStr = msg.getMetaData().getValue(SCOPE);
+
+        if (StringUtils.isEmpty(scopeStr)) {
+            ctx.tellFailure(msg, new IllegalArgumentException("Attribute scope is missing"));
+            return null;
+        }
+
+        try {
+            return AttributeScope.valueOf(scopeStr);
+        } catch (IllegalArgumentException e) {
+            ctx.tellFailure(msg, new IllegalArgumentException("Invalid attribute scope: " + scopeStr));
+            return null;
+        }
     }
 
 }

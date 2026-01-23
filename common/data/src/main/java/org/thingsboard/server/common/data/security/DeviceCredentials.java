@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,15 @@ import org.thingsboard.server.common.data.HasVersion;
 import org.thingsboard.server.common.data.id.DeviceCredentialsId;
 import org.thingsboard.server.common.data.id.DeviceId;
 
+import java.io.Serial;
+
 @Schema
 @EqualsAndHashCode(callSuper = true)
 public class DeviceCredentials extends BaseData<DeviceCredentialsId> implements DeviceCredentialsFilter, HasVersion {
 
+    @Serial
     private static final long serialVersionUID = -7869261127032877765L;
+
     private DeviceId deviceId;
     private DeviceCredentialsType credentialsType;
     private String credentialsId;

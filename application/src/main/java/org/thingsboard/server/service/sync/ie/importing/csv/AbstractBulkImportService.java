@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.thingsboard.server.service.sync.ie.importing.csv;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import jakarta.annotation.Nullable;
@@ -183,10 +184,16 @@ public abstract class AbstractBulkImportService<E extends HasId<? extends Entity
                     data.entrySet().stream()
                             .filter(dataEntry -> dataEntry.getKey().getType() == kvType &&
                                     StringUtils.isNotEmpty(dataEntry.getKey().getKey()))
-                            .forEach(dataEntry -> kvs.add(dataEntry.getKey().getKey(), dataEntry.getValue().toJsonPrimitive()));
+                            .forEach(dataEntry -> {
+                                ParsedValue value = dataEntry.getValue();
+                                JsonElement kvValue = (value.getDataType() == DataType.JSON)
+                                        ? (JsonElement) value.getValue()
+                                        : value.toJsonPrimitive();
+                                kvs.add(dataEntry.getKey().getKey(), kvValue);
+                            });
                     return Map.entry(kvType, kvs);
                 })
-                .filter(kvsEntry -> kvsEntry.getValue().entrySet().size() > 0)
+                .filter(kvsEntry -> !kvsEntry.getValue().entrySet().isEmpty())
                 .forEach(kvsEntry -> {
                     BulkImportColumnType kvType = kvsEntry.getKey();
                     if (kvType == BulkImportColumnType.SHARED_ATTRIBUTE || kvType == BulkImportColumnType.SERVER_ATTRIBUTE) {

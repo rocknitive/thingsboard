@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,11 +55,17 @@ public abstract class JobResult implements Serializable {
 
     public void processTaskResult(TaskResult taskResult) {
         if (taskResult.isSuccess()) {
-            successfulCount++;
+            if (totalCount == null || successfulCount < totalCount) {
+                successfulCount++;
+            }
         } else if (taskResult.isDiscarded()) {
-            discardedCount++;
+            if (totalCount == null || discardedCount < totalCount) {
+                discardedCount++;
+            }
         } else {
-            failedCount++;
+            if (totalCount == null || failedCount < totalCount) {
+                failedCount++;
+            }
             if (results.size() < 100) { // preserving only first 100 errors, not reprocessing if there are more failures
                 results.add(taskResult);
             }

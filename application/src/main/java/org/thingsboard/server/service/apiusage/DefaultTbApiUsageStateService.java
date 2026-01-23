@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -442,13 +442,13 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
         boolean check(long threshold, long warnThreshold, long value);
     }
 
-    private void checkStartOfNextCycle() {
+    public void checkStartOfNextCycle() {
         updateLock.lock();
         try {
             long now = System.currentTimeMillis();
             myUsageStates.values().forEach(state -> {
                 if ((state.getNextCycleTs() < now) && (now - state.getNextCycleTs() < TimeUnit.HOURS.toMillis(1))) {
-                    state.setCycles(state.getNextCycleTs(), SchedulerUtils.getStartOfNextNextMonth());
+                    state.setCycles(state.getNextCycleTs(), SchedulerUtils.getStartOfNextMonth());
                     if (log.isTraceEnabled()) {
                         log.trace("[{}][{}] Updating state cycles (currentCycleTs={},nextCycleTs={})", state.getTenantId(), state.getEntityId(), state.getCurrentCycleTs(), state.getNextCycleTs());
                     }

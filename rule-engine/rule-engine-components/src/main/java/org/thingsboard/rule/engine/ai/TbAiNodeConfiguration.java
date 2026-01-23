@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.thingsboard.rule.engine.api.NodeConfiguration;
 import org.thingsboard.server.common.data.id.AiModelId;
 import org.thingsboard.server.common.data.validation.Length;
+
+import java.util.Set;
+import java.util.UUID;
 
 import static org.thingsboard.rule.engine.ai.TbResponseFormat.TbJsonResponseFormat;
 
@@ -40,6 +42,8 @@ public class TbAiNodeConfiguration implements NodeConfiguration<TbAiNodeConfigur
     @NotBlank
     @Length(min = 1, max = 500_000)
     private String userPrompt;
+
+    private Set<@NotNull(message = "references to resources cannot be null") UUID> resourceIds;
 
     @NotNull
     @Valid

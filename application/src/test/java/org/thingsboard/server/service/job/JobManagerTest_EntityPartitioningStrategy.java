@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,16 @@ import org.thingsboard.server.dao.service.DaoSqlTest;
 public class JobManagerTest_EntityPartitioningStrategy extends JobManagerTest {
 
     /*
-    * Some tests are overridden because they are based on
-    * tenant partitioning strategy (subsequent tasks processing within a tenant)
-    * */
+     * Some tests are overridden because they are based on
+     * tenant partitioning strategy (subsequent tasks processing within a tenant)
+     * */
 
     @Override
-    public void testCancelJob_simulateTaskProcessorRestart() throws Exception {
+    public void testCancelJob_simulateTaskProcessorRestart() {
     }
 
     @Override
     public void testSubmitJob_generalError() {
-
     }
 
 }

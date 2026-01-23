@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.thingsboard.server.common.data.ai.model.chat.GitHubModelsChatModelCon
 import org.thingsboard.server.common.data.ai.model.chat.GoogleAiGeminiChatModelConfig;
 import org.thingsboard.server.common.data.ai.model.chat.GoogleVertexAiGeminiChatModelConfig;
 import org.thingsboard.server.common.data.ai.model.chat.MistralAiChatModelConfig;
+import org.thingsboard.server.common.data.ai.model.chat.OllamaChatModelConfig;
 import org.thingsboard.server.common.data.ai.model.chat.OpenAiChatModelConfig;
 import org.thingsboard.server.common.data.ai.provider.AiProvider;
 import org.thingsboard.server.common.data.ai.provider.AiProviderConfig;
@@ -34,6 +35,7 @@ import org.thingsboard.server.common.data.ai.provider.GitHubModelsProviderConfig
 import org.thingsboard.server.common.data.ai.provider.GoogleAiGeminiProviderConfig;
 import org.thingsboard.server.common.data.ai.provider.GoogleVertexAiGeminiProviderConfig;
 import org.thingsboard.server.common.data.ai.provider.MistralAiProviderConfig;
+import org.thingsboard.server.common.data.ai.provider.OllamaProviderConfig;
 import org.thingsboard.server.common.data.ai.provider.OpenAiProviderConfig;
 
 @JsonTypeInfo(
@@ -50,7 +52,8 @@ import org.thingsboard.server.common.data.ai.provider.OpenAiProviderConfig;
         @JsonSubTypes.Type(value = MistralAiChatModelConfig.class, name = "MISTRAL_AI"),
         @JsonSubTypes.Type(value = AnthropicChatModelConfig.class, name = "ANTHROPIC"),
         @JsonSubTypes.Type(value = AmazonBedrockChatModelConfig.class, name = "AMAZON_BEDROCK"),
-        @JsonSubTypes.Type(value = GitHubModelsChatModelConfig.class, name = "GITHUB_MODELS")
+        @JsonSubTypes.Type(value = GitHubModelsChatModelConfig.class, name = "GITHUB_MODELS"),
+        @JsonSubTypes.Type(value = OllamaChatModelConfig.class, name = "OLLAMA")
 })
 public interface AiModelConfig {
 
@@ -69,7 +72,8 @@ public interface AiModelConfig {
             @JsonSubTypes.Type(value = MistralAiProviderConfig.class, name = "MISTRAL_AI"),
             @JsonSubTypes.Type(value = AnthropicProviderConfig.class, name = "ANTHROPIC"),
             @JsonSubTypes.Type(value = AmazonBedrockProviderConfig.class, name = "AMAZON_BEDROCK"),
-            @JsonSubTypes.Type(value = GitHubModelsProviderConfig.class, name = "GITHUB_MODELS")
+            @JsonSubTypes.Type(value = GitHubModelsProviderConfig.class, name = "GITHUB_MODELS"),
+            @JsonSubTypes.Type(value = OllamaProviderConfig.class, name = "OLLAMA")
     })
     AiProviderConfig providerConfig();
 

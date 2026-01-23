@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao;
 
+import org.thingsboard.server.common.data.EntityInfo;
 import org.thingsboard.server.common.data.id.HasId;
 import org.thingsboard.server.common.data.id.TenantId;
 
@@ -22,8 +23,8 @@ import java.util.List;
 
 public interface ResourceContainerDao<T extends HasId<?>> {
 
-    List<T> findByTenantIdAndResourceLink(TenantId tenantId, String link, int limit);
+    List<EntityInfo> findByTenantIdAndResource(TenantId tenantId, String reference, int limit);
 
-    List<T> findByResourceLink(String link, int limit);
+    List<EntityInfo> findByResource(String reference, int limit);
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import io.netty.handler.codec.mqtt.MqttVersion;
-import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.common.util.AzureIotHubUtil;
 import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.mqtt.MqttClientConfig;
@@ -39,7 +38,6 @@ import org.thingsboard.server.common.data.util.TbPair;
 
 import java.time.Clock;
 
-@Slf4j
 @RuleNode(
         type = ComponentType.EXTERNAL,
         name = "azure iot hub",
@@ -48,7 +46,8 @@ import java.time.Clock;
         clusteringMode = ComponentClusteringMode.SINGLETON,
         nodeDescription = "Publish messages to the Azure IoT Hub",
         nodeDetails = "Will publish message payload to the Azure IoT Hub with QoS <b>AT_LEAST_ONCE</b>.",
-        configDirective = "tbExternalNodeAzureIotHubConfig"
+        configDirective = "tbExternalNodeAzureIotHubConfig",
+        docUrl = "https://thingsboard.io/docs/user-guide/rule-engine-2-0/nodes/external/azure-iot-hub/"
 )
 public class TbAzureIotHubNode extends TbMqttNode {
 

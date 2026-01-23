@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.entityview;
 
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -29,6 +30,8 @@ import org.thingsboard.server.common.data.EntitySubtype;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.EntityViewInfo;
+import org.thingsboard.server.common.data.NameConflictPolicy;
+import org.thingsboard.server.common.data.NameConflictStrategy;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.Edge;
@@ -48,7 +51,7 @@ import org.thingsboard.server.dao.entity.CachedVersionedEntityService;
 import org.thingsboard.server.dao.eventsourcing.ActionEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.DeleteEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.SaveEntityEvent;
-import org.thingsboard.server.dao.exception.DataValidationException;
+import org.thingsboard.server.exception.DataValidationException;
 import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.service.validator.EntityViewDataValidator;
 import org.thingsboard.server.dao.sql.JpaExecutorService;
@@ -60,13 +63,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static org.thingsboard.server.dao.DaoUtil.toUUIDs;
 import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 import static org.thingsboard.server.dao.service.Validator.validateString;
 
-/**
- * Created by Victor Basanets on 8/28/2017.
- */
 @Service("EntityViewDaoService")
 @Slf4j
 public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityViewCacheKey, EntityViewCacheValue, EntityViewEvictEvent> implements EntityViewService {
@@ -111,13 +113,23 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
     }
 
     @Override
+    public EntityView saveEntityView(EntityView entityView, NameConflictStrategy nameConflictStrategy) {
+        return saveEntityView(entityView, true, nameConflictStrategy);
+    }
+
+    @Override
     public EntityView saveEntityView(EntityView entityView, boolean doValidate) {
+        return saveEntityView(entityView, doValidate, NameConflictStrategy.DEFAULT);
+    }
+
+    private EntityView saveEntityView(EntityView entityView, boolean doValidate, NameConflictStrategy nameConflictStrategy) {
         log.trace("Executing save entity view [{}]", entityView);
-        EntityView old = null;
+        EntityView old = (entityView.getId() != null) ? entityViewDao.findById(entityView.getTenantId(), entityView.getId().getId()) : null;
+        if (nameConflictStrategy.policy() == NameConflictPolicy.UNIQUIFY && (old == null || !entityView.getName().equals(old.getName()))) {
+            uniquifyEntityName(entityView, old, entityView::setName, EntityType.ENTITY_VIEW, nameConflictStrategy);
+        }
         if (doValidate) {
-            old = entityViewValidator.validate(entityView, EntityView::getTenantId);
-        } else if (entityView.getId() != null) {
-            old = findEntityViewById(entityView.getTenantId(), entityView.getId(), false);
+            entityViewValidator.validate(entityView, EntityView::getTenantId);
         }
         try {
             EntityView saved = entityViewDao.save(entityView.getTenantId(), entityView);
@@ -176,6 +188,17 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
     public EntityView findEntityViewById(TenantId tenantId, EntityViewId entityViewId, boolean putInCache) {
         log.trace("Executing findEntityViewById [{}]", entityViewId);
         validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        return findEntityViewByIdInternal(tenantId, entityViewId, putInCache);
+    }
+
+    @Override
+    public ListenableFuture<EntityView> findEntityViewByIdAsync(TenantId tenantId, EntityViewId entityViewId) {
+        log.trace("Executing findEntityViewByIdAsync [{}]", entityViewId);
+        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        return service.submit(() -> findEntityViewByIdInternal(tenantId, entityViewId, true));
+    }
+
+    private EntityView findEntityViewByIdInternal(TenantId tenantId, EntityViewId entityViewId, boolean putInCache) {
         EntityViewCacheValue value = cache.get(EntityViewCacheKey.byId(entityViewId), () -> {
             EntityView entityView = entityViewDao.findById(tenantId, entityViewId.getId());
             return new EntityViewCacheValue(entityView, null);
@@ -190,7 +213,6 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
         return cache.getAndPutInTransaction(EntityViewCacheKey.byName(tenantId, name),
                 () -> entityViewDao.findEntityViewByTenantIdAndName(tenantId.getId(), name).orElse(null)
                 , EntityViewCacheValue::getEntityView, v -> new EntityViewCacheValue(v, null), true);
-
     }
 
     @Override
@@ -244,6 +266,12 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
         validatePageLink(pageLink);
         return entityViewDao.findEntityViewsByTenantIdAndCustomerId(tenantId.getId(),
                 customerId.getId(), pageLink);
+    }
+
+    @Override
+    public List<EntityView> findEntityViewsByTenantIdAndIds(TenantId tenantId, List<EntityViewId> entityViewIds) {
+        log.trace("Executing findEntityViewsByTenantIdAndIds, tenantId [{}], entityViewIds [{}]", tenantId, entityViewIds);
+        return entityViewDao.findEntityViewsByTenantIdAndIds(tenantId.getId(), toUUIDs(entityViewIds));
     }
 
     @Override
@@ -305,13 +333,6 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
         }, MoreExecutors.directExecutor());
 
         return entityViews;
-    }
-
-    @Override
-    public ListenableFuture<EntityView> findEntityViewByIdAsync(TenantId tenantId, EntityViewId entityViewId) {
-        log.trace("Executing findEntityViewByIdAsync [{}]", entityViewId);
-        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
-        return entityViewDao.findByIdAsync(tenantId, entityViewId.getId());
     }
 
     @Override
@@ -477,6 +498,12 @@ public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityVi
     @Override
     public Optional<HasId<?>> findEntity(TenantId tenantId, EntityId entityId) {
         return Optional.ofNullable(findEntityViewById(tenantId, new EntityViewId(entityId.getId())));
+    }
+
+    @Override
+    public FluentFuture<Optional<HasId<?>>> findEntityAsync(TenantId tenantId, EntityId entityId) {
+        return FluentFuture.from(findEntityViewByIdAsync(tenantId, new EntityViewId(entityId.getId())))
+                .transform(Optional::ofNullable, directExecutor());
     }
 
     @Override

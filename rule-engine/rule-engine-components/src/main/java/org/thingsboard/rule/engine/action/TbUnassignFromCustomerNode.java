@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ import org.thingsboard.server.common.msg.TbMsg;
                 "Other entities can be assigned only to one customer, so specified customer title in the configuration will be ignored if the originator isn't a dashboard.",
         configDirective = "tbActionNodeUnAssignToCustomerConfig",
         icon = "remove_circle",
-        version = 1
+        version = 1,
+        docUrl = "https://thingsboard.io/docs/user-guide/rule-engine-2-0/nodes/action/unassign-from-customer/"
 )
 public class TbUnassignFromCustomerNode extends TbAbstractCustomerActionNode<TbUnassignFromCustomerNodeConfiguration> {
 

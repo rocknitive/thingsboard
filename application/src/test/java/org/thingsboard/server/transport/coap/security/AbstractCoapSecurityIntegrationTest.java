@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "coap.server.enabled=true",
         "coap.dtls.enabled=true",
         "coap.dtls.credentials.pem.cert_file=coap/credentials/server/cert.pem",
+        "coap.dtls.x509.skip_validity_check_for_client_cert=true",
         "device.connectivity.coaps.enabled=true",
         "service.integrations.supported=ALL",
         "transport.coap.enabled=true",

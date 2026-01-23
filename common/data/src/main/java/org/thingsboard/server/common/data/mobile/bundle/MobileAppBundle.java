@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.thingsboard.server.common.data.id.MobileAppId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.mobile.layout.MobileLayoutConfig;
 import org.thingsboard.server.common.data.validation.Length;
+import org.thingsboard.server.common.data.validation.NoXss;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -40,9 +41,11 @@ public class MobileAppBundle extends BaseData<MobileAppBundleId> implements HasT
     private TenantId tenantId;
     @Schema(description = "Application bundle title. Cannot be empty", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
+    @NoXss
     @Length(fieldName = "title")
     private String title;
     @Schema(description = "Application bundle description.")
+    @NoXss
     @Length(fieldName = "description")
     private String description;
     @Schema(description = "Android application id")

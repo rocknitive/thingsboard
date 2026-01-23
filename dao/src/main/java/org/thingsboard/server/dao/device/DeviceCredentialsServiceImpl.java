@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,11 @@ import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.msg.EncryptionUtil;
 import org.thingsboard.server.dao.entity.AbstractCachedEntityService;
 import org.thingsboard.server.dao.eventsourcing.ActionEntityEvent;
-import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.DeviceCredentialsValidationException;
 import org.thingsboard.server.dao.service.validator.DeviceCredentialsDataValidator;
+import org.thingsboard.server.exception.DataValidationException;
+
+import java.util.Objects;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validateString;
@@ -61,8 +63,8 @@ public class DeviceCredentialsServiceImpl extends AbstractCachedEntityService<St
     @TransactionalEventListener(classes = DeviceCredentialsEvictEvent.class)
     @Override
     public void handleEvictEvent(DeviceCredentialsEvictEvent event) {
-        cache.evict(event.getNewCedentialsId());
-        if (StringUtils.isNotEmpty(event.getOldCredentialsId()) && !event.getNewCedentialsId().equals(event.getOldCredentialsId())) {
+        cache.evict(event.getNewCredentialsId());
+        if (StringUtils.isNotEmpty(event.getOldCredentialsId()) && !event.getNewCredentialsId().equals(event.getOldCredentialsId())) {
             cache.evict(event.getOldCredentialsId());
         }
     }
@@ -107,7 +109,7 @@ public class DeviceCredentialsServiceImpl extends AbstractCachedEntityService<St
         try {
             var value = deviceCredentialsDao.saveAndFlush(tenantId, deviceCredentials);
             publishEvictEvent(new DeviceCredentialsEvictEvent(value.getCredentialsId(), oldDeviceCredentials != null ? oldDeviceCredentials.getCredentialsId() : null));
-            if (oldDeviceCredentials != null) {
+            if (oldDeviceCredentials != null && isCredentialsChanged(oldDeviceCredentials, value)) {
                 eventPublisher.publishEvent(ActionEntityEvent.builder().tenantId(tenantId).entity(value).entityId(value.getDeviceId()).actionType(ActionType.CREDENTIALS_UPDATED).build());
             }
             return value;
@@ -140,13 +142,11 @@ public class DeviceCredentialsServiceImpl extends AbstractCachedEntityService<St
 
     @Override
     public JsonNode toCredentialsInfo(DeviceCredentials deviceCredentials) {
-        switch (deviceCredentials.getCredentialsType()) {
-            case ACCESS_TOKEN:
-                return JacksonUtil.valueToTree(deviceCredentials.getCredentialsId());
-            case X509_CERTIFICATE:
-                return JacksonUtil.valueToTree(deviceCredentials.getCredentialsValue());
-        }
-        return JacksonUtil.fromString(deviceCredentials.getCredentialsValue(), JsonNode.class);
+        return switch (deviceCredentials.getCredentialsType()) {
+            case ACCESS_TOKEN -> JacksonUtil.valueToTree(deviceCredentials.getCredentialsId());
+            case X509_CERTIFICATE -> JacksonUtil.valueToTree(deviceCredentials.getCredentialsValue());
+            default -> JacksonUtil.fromString(deviceCredentials.getCredentialsValue(), JsonNode.class);
+        };
     }
 
     private void formatSimpleMqttCredentials(DeviceCredentials deviceCredentials) {
@@ -405,6 +405,13 @@ public class DeviceCredentialsServiceImpl extends AbstractCachedEntityService<St
         if (credentials != null) {
             publishEvictEvent(new DeviceCredentialsEvictEvent(credentials.getCredentialsId(), null));
         }
+    }
+
+    private boolean isCredentialsChanged(DeviceCredentials oldCredentials, DeviceCredentials newCredentials) {
+        return !Objects.equals(oldCredentials.getCredentialsId(), newCredentials.getCredentialsId())
+                || oldCredentials.getCredentialsType() != newCredentials.getCredentialsType()
+                || !Objects.equals(oldCredentials.getCredentialsValue(), newCredentials.getCredentialsValue())
+                || !Objects.equals(oldCredentials.getDeviceId(), newCredentials.getDeviceId());
     }
 
 }

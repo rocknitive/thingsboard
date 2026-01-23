@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2025 The Thingsboard Authors
+/// Copyright © 2016-2026 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ export const doughnutPieChartSettings = (settings: DoughnutWidgetSettings): Deep
   showTotal: settings.layout === DoughnutLayout.with_total,
   animation: settings.animation,
   showLegend: settings.showLegend,
+  legendShowTotal: settings.legendShowTotal,
   totalValueFont: settings.totalValueFont,
   totalValueColor: settings.totalValueColor,
   showLabel: false,

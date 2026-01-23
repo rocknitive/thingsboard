@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,10 @@ public class AiModelControllerTest extends AbstractControllerTest {
         var model = doPost("/api/ai/model", constructValidOpenAiModel("Test model"), AiModel.class);
 
         var newModelConfig = OpenAiChatModelConfig.builder()
-                .providerConfig(new OpenAiProviderConfig("test-api-key-updated"))
+                .providerConfig(OpenAiProviderConfig.builder()
+                        .baseUrl(OpenAiProviderConfig.OPENAI_OFFICIAL_BASE_URL)
+                        .apiKey("test-api-key-updated")
+                        .build())
                 .modelId("o4-mini")
                 .temperature(0.2)
                 .topP(0.4)
@@ -270,7 +273,7 @@ public class AiModelControllerTest extends AbstractControllerTest {
                 .tenantId(tenantId)
                 .name("Test model 1")
                 .configuration(OpenAiChatModelConfig.builder()
-                        .providerConfig(new OpenAiProviderConfig("test-api-key"))
+                        .providerConfig(OpenAiProviderConfig.builder().apiKey("test-api-key").build())
                         .modelId("o3-pro")
                         .build())
                 .build(), AiModel.class);
@@ -594,7 +597,10 @@ public class AiModelControllerTest extends AbstractControllerTest {
 
     private AiModel constructValidOpenAiModel(String name) {
         var modelConfig = OpenAiChatModelConfig.builder()
-                .providerConfig(new OpenAiProviderConfig("test-api-key"))
+                .providerConfig(OpenAiProviderConfig.builder()
+                        .baseUrl(OpenAiProviderConfig.OPENAI_OFFICIAL_BASE_URL)
+                        .apiKey("test-api-key")
+                        .build())
                 .modelId("gpt-4o")
                 .temperature(0.5)
                 .topP(0.3)

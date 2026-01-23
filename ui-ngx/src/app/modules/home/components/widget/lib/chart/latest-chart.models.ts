@@ -1,5 +1,5 @@
 ///
-/// Copyright © 2016-2025 The Thingsboard Authors
+/// Copyright © 2016-2026 The Thingsboard Authors
 ///
 /// Licensed under the Apache License, Version 2.0 (the "License");
 /// you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ export interface LatestChartSettings extends LatestChartTooltipSettings {
   sortSeries: boolean;
   showTotal?: boolean;
   showLegend: boolean;
+  legendShowTotal: boolean;
   animation: ChartAnimationSettings;
 }
 
@@ -96,6 +97,7 @@ export const latestChartDefaultSettings: LatestChartSettings = {
   sortSeries: false,
   showTotal: false,
   showLegend: true,
+  legendShowTotal: true,
   animation: mergeDeep({} as ChartAnimationSettings, chartAnimationDefaultSettings)
 };
 
@@ -111,7 +113,6 @@ export interface LatestChartWidgetSettings extends LatestChartSettings {
 
 export const latestChartWidgetDefaultSettings: LatestChartWidgetSettings = {
   ...latestChartDefaultSettings,
-  showLegend: true,
   legendPosition: LegendPosition.bottom,
   legendLabelFont: {
     family: 'Roboto',

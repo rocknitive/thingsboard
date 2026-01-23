@@ -1,6 +1,6 @@
 <!--
 
-    Copyright © 2016-2025 The Thingsboard Authors
+    Copyright © 2016-2026 The Thingsboard Authors
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
         labelText="rule-node-config.ai.model"
         (entityChanged)="onEntityChange($event)"
         [entityType]="entityType.AI_MODEL"
-        (createNew)="createModelAi('modelId')"
+        (createNew)="createModelAi($event, 'modelId')"
         formControlName="modelId">
       </tb-entity-autocomplete>
     </section>
@@ -70,6 +70,17 @@
             {{ 'rule-node-config.ai.user-prompt-blank' | translate }}
           </mat-error>
         </mat-form-field>
+        <tb-entity-list
+          class="flex-1"
+          syncIdsWithDB
+          allowCreateNew
+          placeholderText="{{ 'rule-node-config.ai.ai-resources' | translate }}"
+          [inlineField]="true"
+          [entityType]="EntityType.TB_RESOURCE"
+          [subType]="ResourceType.GENERAL"
+          (createNew)="createAiResources($event, 'resourceIds')"
+          formControlName="resourceIds">
+        </tb-entity-list>
       </div>
     </mat-expansion-panel>
   </div>

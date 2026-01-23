@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.ResourceExportData;
 import org.thingsboard.server.common.data.ResourceSubType;
 import org.thingsboard.server.common.data.ResourceType;
 import org.thingsboard.server.common.data.TbResource;
+import org.thingsboard.server.common.data.TbResourceDataInfo;
 import org.thingsboard.server.common.data.TbResourceDeleteResult;
 import org.thingsboard.server.common.data.TbResourceInfo;
 import org.thingsboard.server.common.data.TbResourceInfoFilter;
@@ -45,6 +46,8 @@ public interface ResourceService extends EntityDaoService {
     TbResource findResourceById(TenantId tenantId, TbResourceId resourceId);
 
     byte[] getResourceData(TenantId tenantId, TbResourceId resourceId);
+
+    TbResourceDataInfo getResourceDataInfo(TenantId tenantId, TbResourceId resourceId);
 
     ResourceExportData exportResource(TbResourceInfo resourceInfo);
 
@@ -89,5 +92,7 @@ public interface ResourceService extends EntityDaoService {
     Collection<TbResourceInfo> getUsedResources(TenantId tenantId, WidgetTypeDetails widgetTypeDetails);
 
     TbResource createOrUpdateSystemResource(ResourceType resourceType, ResourceSubType resourceSubType, String resourceKey, byte[] data);
+
+    List<TbResourceInfo> findSystemOrTenantResourcesByIds(TenantId tenantId, List<TbResourceId> resourceIds);
 
 }

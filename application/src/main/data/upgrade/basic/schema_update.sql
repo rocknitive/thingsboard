@@ -1,5 +1,5 @@
 --
--- Copyright © 2016-2025 The Thingsboard Authors
+-- Copyright © 2016-2026 The Thingsboard Authors
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -14,33 +14,69 @@
 -- limitations under the License.
 --
 
--- UPDATE OTA PACKAGE EXTERNAL ID START
+-- UPDATE TENANT PROFILE CONFIGURATION START
 
-ALTER TABLE ota_package
-    ADD COLUMN IF NOT EXISTS external_id uuid;
+UPDATE tenant_profile
+SET profile_data = jsonb_set(
+    profile_data,
+    '{configuration}',
+    jsonb_build_object(
+        'minAllowedScheduledUpdateIntervalInSecForCF', 10,
+        'maxRelationLevelPerCfArgument', 2,
+        'maxRelatedEntitiesToReturnPerCfArgument', 100,
+        'minAllowedDeduplicationIntervalInSecForCF', 10,
+        'minAllowedAggregationIntervalInSecForCF', 60,
+        'intermediateAggregationIntervalInSecForCF', 300,
+        'cfReevaluationCheckInterval', 60,
+        'alarmsReevaluationInterval', 60
+    )
+    ||
+    jsonb_strip_nulls(profile_data -> 'configuration')
+)
+WHERE NOT (
+    jsonb_strip_nulls(profile_data -> 'configuration') ?& ARRAY[
+        'minAllowedScheduledUpdateIntervalInSecForCF',
+        'maxRelationLevelPerCfArgument',
+        'maxRelatedEntitiesToReturnPerCfArgument',
+        'minAllowedDeduplicationIntervalInSecForCF',
+        'minAllowedAggregationIntervalInSecForCF',
+        'intermediateAggregationIntervalInSecForCF',
+        'cfReevaluationCheckInterval',
+        'alarmsReevaluationInterval'
+    ]
+);
 
-DO
-$$
-    BEGIN
-        IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname = 'ota_package_external_id_unq_key') THEN
-            ALTER TABLE ota_package ADD CONSTRAINT ota_package_external_id_unq_key UNIQUE (tenant_id, external_id);
-        END IF;
-    END;
-$$;
+-- UPDATE TENANT PROFILE CONFIGURATION END
 
--- UPDATE OTA PACKAGE EXTERNAL ID END
+-- CALCULATED FIELD UNIQUE CONSTRAINT UPDATE START
 
--- DROP INDEXES THAT DUPLICATE UNIQUE CONSTRAINT START
+ALTER TABLE calculated_field DROP CONSTRAINT IF EXISTS calculated_field_unq_key;
+ALTER TABLE calculated_field ADD CONSTRAINT calculated_field_unq_key UNIQUE (entity_id, type, name);
 
-DROP INDEX IF EXISTS idx_device_external_id;
-DROP INDEX IF EXISTS idx_device_profile_external_id;
-DROP INDEX IF EXISTS idx_asset_external_id;
-DROP INDEX IF EXISTS idx_entity_view_external_id;
-DROP INDEX IF EXISTS idx_rule_chain_external_id;
-DROP INDEX IF EXISTS idx_dashboard_external_id;
-DROP INDEX IF EXISTS idx_customer_external_id;
-DROP INDEX IF EXISTS idx_widgets_bundle_external_id;
+-- CALCULATED FIELD UNIQUE CONSTRAINT UPDATE END
 
--- DROP INDEXES THAT DUPLICATE UNIQUE CONSTRAINT END
+-- CALCULATED FIELD OUTPUT STRATEGY UPDATE START
 
-ALTER TABLE mobile_app ADD COLUMN IF NOT EXISTS title varchar(255);
+UPDATE calculated_field
+SET configuration = jsonb_set(
+        configuration::jsonb,
+        '{output}',
+        (configuration::jsonb -> 'output')
+            || jsonb_build_object(
+                'strategy',
+                jsonb_build_object(
+                        'type', 'RULE_CHAIN'
+                )
+               ),
+        false
+                    )
+WHERE (configuration::jsonb -> 'output' -> 'strategy') IS NULL;
+
+-- CALCULATED FIELD OUTPUT STRATEGY UPDATE END
+
+-- REMOVAL OF CALCULATED FIELD LINKS PERSISTENCE START
+
+DROP TABLE IF EXISTS calculated_field_link;
+ANALYZE calculated_field;
+
+-- REMOVAL OF CALCULATED FIELD LINKS PERSISTENCE END

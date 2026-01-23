@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2026 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.tenant;
 
+import com.google.common.util.concurrent.FluentFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,17 @@ import org.thingsboard.server.common.data.tenant.profile.TenantProfileData;
 import org.thingsboard.server.dao.entity.AbstractCachedEntityService;
 import org.thingsboard.server.dao.eventsourcing.DeleteEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.SaveEntityEvent;
-import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.service.Validator;
+import org.thingsboard.server.exception.DataValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.thingsboard.common.util.DebugModeUtil.DEBUG_MODE_DEFAULT_DURATION_MINUTES;
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -231,22 +233,28 @@ public class TenantProfileServiceImpl extends AbstractCachedEntityService<Tenant
     }
 
     @Override
+    public FluentFuture<Optional<HasId<?>>> findEntityAsync(TenantId tenantId, EntityId entityId) {
+        return FluentFuture.from(tenantProfileDao.findByIdAsync(tenantId, entityId.getId()))
+                .transform(Optional::ofNullable, directExecutor());
+    }
+
+    @Override
     public EntityType getEntityType() {
         return EntityType.TENANT_PROFILE;
     }
 
-    private final PaginatedRemover<String, TenantProfile> tenantProfilesRemover =
-            new PaginatedRemover<>() {
+    private final PaginatedRemover<String, TenantProfile> tenantProfilesRemover = new PaginatedRemover<>() {
 
-                @Override
-                protected PageData<TenantProfile> findEntities(TenantId tenantId, String id, PageLink pageLink) {
-                    return tenantProfileDao.findTenantProfiles(tenantId, pageLink);
-                }
+        @Override
+        protected PageData<TenantProfile> findEntities(TenantId tenantId, String id, PageLink pageLink) {
+            return tenantProfileDao.findTenantProfiles(tenantId, pageLink);
+        }
 
-                @Override
-                protected void removeEntity(TenantId tenantId, TenantProfile entity) {
-                    removeTenantProfile(tenantId, entity, entity.isDefault());
-                }
-            };
+        @Override
+        protected void removeEntity(TenantId tenantId, TenantProfile entity) {
+            removeTenantProfile(tenantId, entity, entity.isDefault());
+        }
+
+    };
 
 }
