@@ -72,6 +72,6 @@ public class CoapTransportContext extends TransportContext {
     @Autowired
     private CoapClientContext clientContext;
 
-    private final ConcurrentMap<Integer, TransportProtos.ToDeviceRpcRequestMsg> rpcAwaitingAck = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TransportProtos.ToDeviceRpcRequestMsg> rpcAwaitingAck = new ConcurrentHashMap<>();
 
 }

@@ -338,7 +338,21 @@ public class DefaultCoapClientContext implements CoapClientContext {
                     response.getOptions().setObserve(state.getRpc().getObserveCounter().getAndIncrement());
                     transportService.process(state.getSession(),
                             TransportProtos.SubscribeToRPCMsg.getDefaultInstance(),
-                            new CoapResponseCallback(exchange, response,  new Response(CoAP.ResponseCode.INTERNAL_SERVER_ERROR))
+                            new CoapResponseCallback(exchange, response, new Response(CoAP.ResponseCode.INTERNAL_SERVER_ERROR)) {
+                                @Override
+                                public void onSuccess(Void msg) {
+                                    super.onSuccess(msg);
+                                    state.lock();
+                                    try {
+                                        if (state.getRpc() != null && state.getRpc().getToken().equals(token)) {
+                                            state.getRpc().setReady(true);
+                                        }
+                                    } finally {
+                                        state.unlock();
+                                    }
+                                    processNextQueuedRpc(state);
+                                }
+                            }
                     );
                 }
             }
@@ -577,79 +591,17 @@ public class DefaultCoapClientContext implements CoapClientContext {
                 log.trace("[{}][{}] ignore downlink request cause client is sleeping.", deviceId, sessionId);
                 return;
             }
-            boolean sent = false;
-            String error = null;
-            boolean conRequest = AbstractSyncSessionCallback.isConRequest(state.getRpc());
-            boolean isMulticastRequest = AbstractSyncSessionCallback.isMulticastRequest(state.getRpc());
-            int requestId = getNextMsgId(isMulticastRequest);
+            state.lock();
             try {
-                Response response = state.getAdaptor().convertToPublish(msg, state.getConfiguration().getRpcRequestDynamicMessageBuilder());
-                response.getOptions().setObserve(state.getRpc().getObserveCounter().getAndIncrement());
-                response.setConfirmable(conRequest);
-                response.setMID(requestId);
-                if (conRequest) {
-                    PowerMode powerMode = state.getPowerMode();
-                    PowerSavingConfiguration profileSettings = null;
-                    if (powerMode == null) {
-                        var clientProfile = getProfile(state.getProfileId());
-                        if (clientProfile.isPresent()) {
-                            profileSettings = clientProfile.get().getClientSettings();
-                            if (profileSettings != null) {
-                                powerMode = profileSettings.getPowerMode();
-                            }
-                        }
-                    }
-
-                    transportContext.getRpcAwaitingAck().put(requestId, msg);
-                    transportContext.getScheduler().schedule(() -> {
-                        TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(requestId);
-                        if (rpcRequestMsg != null) {
-                            log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update due to server timeout ...", deviceId, sessionId, requestId);
-                            transportService.process(state.getSession(), msg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
-                        }
-                    }, Math.min(getTimeout(state, powerMode, profileSettings), msg.getExpirationTime() - System.currentTimeMillis()), TimeUnit.MILLISECONDS);
-
-                    response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> {
-                        TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(id);
-                        if (rpcRequestMsg != null) {
-                            log.trace("[{}][{}][{}] Going to send to device actor RPC request DELIVERED status update ...", deviceId, sessionId, requestId);
-                            transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.DELIVERED, true, TransportServiceCallback.EMPTY);
-                        }
-                    }, id -> {
-                        TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(id);
-                        if (rpcRequestMsg != null) {
-                            log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update ...", deviceId, sessionId, requestId);
-                            transportService.process(state.getSession(), msg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
-                        }
-                    }));
+                if (state.getRpc() == null) {
+                    log.debug("[{}][{}] RPC subscription is not available for request: {}", deviceId, sessionId, msg.getRequestId());
+                    return;
                 }
-                if (conRequest) {
-                    response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> awake(state), id -> asleep(state)));
-                }
-                respond(state.getRpc().getExchange(), response, state.getContentFormat());
-                sent = true;
-            } catch (AdaptorException e) {
-                log.trace("Failed to reply due to error", e);
-                cancelObserveRelation(state.getRpc());
-                cancelRpcSubscription(state);
-                error = "Failed to convert device RPC command to CoAP msg";
-            } catch (Exception e) {
-                error = "Internal error: " + e.getMessage();
+                state.getRpc().getPendingRpcRequests().offer(msg);
             } finally {
-                if (StringUtils.isNotEmpty(error)) {
-                    transportService.process(state.getSession(),
-                            TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
-                                    .setRequestId(msg.getRequestId()).setError(error).build(), TransportServiceCallback.EMPTY);
-                } else if (sent) {
-                    if (!conRequest) {
-                        log.trace("[{}][{}][{}] Going to send to device actor non-confirmable RPC request DELIVERED status update ...", deviceId, sessionId, requestId);
-                        transportService.process(state.getSession(), msg, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
-                    } else if (msg.getPersisted()) {
-                        log.trace("[{}][{}][{}] Going to send to device actor RPC request SENT status update ...", deviceId, sessionId, requestId);
-                        transportService.process(state.getSession(), msg, RpcStatus.SENT, TransportServiceCallback.EMPTY);
-                    }
-                }
+                state.unlock();
             }
+            processNextQueuedRpc(state);
         }
 
         @Override
@@ -662,10 +614,139 @@ public class DefaultCoapClientContext implements CoapClientContext {
             awake(state, false, notificationMsg.getUplinkTs());
         }
 
-        private void cancelObserveRelation(TbCoapObservationState attrs) {
-            if (attrs.getObserveRelation() != null) {
-                attrs.getObserveRelation().cancel();
+    }
+
+    private void processNextQueuedRpc(TbCoapClientState state) {
+        PendingRpcDelivery pendingDelivery = null;
+        state.lock();
+        try {
+            TbCoapObservationState rpcState = state.getRpc();
+            if (rpcState == null || !rpcState.isReady() || rpcState.isRpcInFlight()) {
+                return;
             }
+            TransportProtos.ToDeviceRpcRequestMsg msg = rpcState.getPendingRpcRequests().poll();
+            if (msg == null) {
+                return;
+            }
+            rpcState.setRpcInFlight(true);
+            pendingDelivery = new PendingRpcDelivery(rpcState, msg);
+        } finally {
+            state.unlock();
+        }
+        sendQueuedRpc(state, pendingDelivery);
+    }
+
+    private void sendQueuedRpc(TbCoapClientState state, PendingRpcDelivery delivery) {
+        TbCoapObservationState rpcState = delivery.rpcState();
+        TransportProtos.ToDeviceRpcRequestMsg msg = delivery.msg();
+        UUID sessionId = new UUID(state.getSession().getSessionIdMSB(), state.getSession().getSessionIdLSB());
+        DeviceId deviceId = state.getDeviceId();
+        boolean sent = false;
+        boolean markInFlightCompleted = true;
+        String error = null;
+        boolean conRequest = AbstractSyncSessionCallback.isConRequest(rpcState);
+        boolean isMulticastRequest = AbstractSyncSessionCallback.isMulticastRequest(rpcState);
+        int requestId = getNextMsgId(isMulticastRequest);
+        try {
+            Response response = state.getAdaptor().convertToPublish(msg, state.getConfiguration().getRpcRequestDynamicMessageBuilder());
+            response.getOptions().setObserve(rpcState.getObserveCounter().getAndIncrement());
+            response.setConfirmable(conRequest);
+            response.setMID(requestId);
+            if (conRequest) {
+                PowerMode powerMode = state.getPowerMode();
+                PowerSavingConfiguration profileSettings = null;
+                if (powerMode == null) {
+                    var clientProfile = getProfile(state.getProfileId());
+                    if (clientProfile.isPresent()) {
+                        profileSettings = clientProfile.get().getClientSettings();
+                        if (profileSettings != null) {
+                            powerMode = profileSettings.getPowerMode();
+                        }
+                    }
+                }
+
+                String awaitingAckKey = getAwaitingAckKey(sessionId, requestId);
+                transportContext.getRpcAwaitingAck().put(awaitingAckKey, msg);
+                transportContext.getScheduler().schedule(() -> {
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    if (rpcRequestMsg != null) {
+                        log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update due to server timeout ...", deviceId, sessionId, requestId);
+                        transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
+                        onRpcDeliveryFinished(state, rpcState);
+                    }
+                }, Math.min(getTimeout(state, powerMode, profileSettings), msg.getExpirationTime() - System.currentTimeMillis()), TimeUnit.MILLISECONDS);
+
+                response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> {
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    if (rpcRequestMsg != null) {
+                        log.trace("[{}][{}][{}] Going to send to device actor RPC request DELIVERED status update ...", deviceId, sessionId, requestId);
+                        transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.DELIVERED, true, TransportServiceCallback.EMPTY);
+                        onRpcDeliveryFinished(state, rpcState);
+                    }
+                }, id -> {
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    if (rpcRequestMsg != null) {
+                        log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update ...", deviceId, sessionId, requestId);
+                        transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
+                        onRpcDeliveryFinished(state, rpcState);
+                    }
+                }));
+                markInFlightCompleted = false;
+            }
+            if (conRequest) {
+                response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> awake(state), id -> asleep(state)));
+            }
+            respond(rpcState.getExchange(), response, state.getContentFormat());
+            sent = true;
+        } catch (AdaptorException e) {
+            log.trace("Failed to reply due to error", e);
+            cancelObserveRelation(rpcState);
+            cancelRpcSubscription(state);
+            error = "Failed to convert device RPC command to CoAP msg";
+        } catch (Exception e) {
+            error = "Internal error: " + e.getMessage();
+        } finally {
+            if (StringUtils.isNotEmpty(error)) {
+                transportService.process(state.getSession(),
+                        TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
+                                .setRequestId(msg.getRequestId()).setError(error).build(), TransportServiceCallback.EMPTY);
+            } else if (sent) {
+                if (!conRequest) {
+                    log.trace("[{}][{}][{}] Going to send to device actor non-confirmable RPC request DELIVERED status update ...", deviceId, sessionId, requestId);
+                    transportService.process(state.getSession(), msg, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
+                } else if (msg.getPersisted()) {
+                    log.trace("[{}][{}][{}] Going to send to device actor RPC request SENT status update ...", deviceId, sessionId, requestId);
+                    transportService.process(state.getSession(), msg, RpcStatus.SENT, TransportServiceCallback.EMPTY);
+                }
+            }
+            if (markInFlightCompleted) {
+                onRpcDeliveryFinished(state, rpcState);
+            }
+        }
+    }
+
+    private void onRpcDeliveryFinished(TbCoapClientState state, TbCoapObservationState rpcState) {
+        state.lock();
+        try {
+            if (state.getRpc() == rpcState) {
+                rpcState.setRpcInFlight(false);
+            }
+        } finally {
+            state.unlock();
+        }
+        processNextQueuedRpc(state);
+    }
+
+    private String getAwaitingAckKey(UUID sessionId, int requestId) {
+        return sessionId + ":" + requestId;
+    }
+
+    private record PendingRpcDelivery(TbCoapObservationState rpcState, TransportProtos.ToDeviceRpcRequestMsg msg) {
+    }
+
+    private void cancelObserveRelation(TbCoapObservationState attrs) {
+        if (attrs.getObserveRelation() != null) {
+            attrs.getObserveRelation().cancel();
         }
     }
 

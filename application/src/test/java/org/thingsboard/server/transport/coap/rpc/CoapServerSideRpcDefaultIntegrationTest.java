@@ -92,4 +92,9 @@ public class CoapServerSideRpcDefaultIntegrationTest extends AbstractCoapServerS
         processTwoWayRpcTest("{\"value1\":\"A\",\"value2\":\"B\"}", false);
     }
 
+    @Test
+    public void testServerCoapBufferedTwoWayRpcReplayAfterResubscribe() throws Exception {
+        processBufferedTwoWayRpcReplayTest();
+    }
+
 }

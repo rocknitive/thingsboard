@@ -19,7 +19,10 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.californium.core.observe.ObserveRelation;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.thingsboard.server.gen.transport.TransportProtos;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
@@ -29,6 +32,9 @@ public class TbCoapObservationState {
     private final CoapExchange exchange;
     private final String token;
     private final AtomicInteger observeCounter = new AtomicInteger(0);
+    private final Queue<TransportProtos.ToDeviceRpcRequestMsg> pendingRpcRequests = new ArrayDeque<>();
     private volatile ObserveRelation observeRelation;
+    private volatile boolean ready;
+    private volatile boolean rpcInFlight;
 
 }

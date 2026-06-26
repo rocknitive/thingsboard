@@ -41,6 +41,9 @@ import org.thingsboard.server.transport.coap.AbstractCoapIntegrationTest;
 import org.thingsboard.server.transport.coap.CoapTestCallback;
 import org.thingsboard.server.transport.coap.CoapTestClient;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -48,6 +51,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -154,6 +158,46 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
 
         observeRelation.proactiveCancel();
         return observeRelation.isCanceled();
+    }
+
+    protected void processBufferedTwoWayRpcReplayTest() throws Exception {
+        List<String> expectedRequests = new ArrayList<>();
+        String deviceId = savedDevice.getId().getId().toString();
+
+        for (int i = 0; i < 5; i++) {
+            String request = String.format("{\"method\":\"setGpio%d\",\"params\":{\"pin\":\"%d\",\"value\":%d},\"persistent\":true,\"timeout\":60000}", i, 30 + i, i);
+            expectedRequests.add(String.format("{\"id\":%d,\"method\":\"setGpio%d\",\"params\":{\"pin\":\"%d\",\"value\":%d}}", i, i, 30 + i, i));
+            doPostAsync("/api/rpc/twoway/" + deviceId, request, String.class, status().isOk());
+        }
+
+        client = new CoapTestClient(accessToken, FeatureType.RPC);
+        RecordingCoapCallback callback = new RecordingCoapCallback();
+
+        CoapObserveRelation firstRelation = client.getObserveRelation(callback);
+        await("await first replay subscription")
+                .atMost(DEFAULT_WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .until(() -> callback.getRpcPayloads().size() == expectedRequests.size());
+        assertRequestsMatch(expectedRequests, callback.drainRpcPayloads());
+
+        firstRelation.proactiveCancel();
+        assertTrue(firstRelation.isCanceled());
+
+        CoapObserveRelation secondRelation = client.getObserveRelation(callback);
+        await("await second replay subscription")
+                .atMost(DEFAULT_WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .until(() -> callback.getRpcPayloads().size() == expectedRequests.size());
+        assertRequestsMatch(expectedRequests, callback.drainRpcPayloads());
+
+        secondRelation.proactiveCancel();
+        assertTrue(secondRelation.isCanceled());
+    }
+
+    private void assertRequestsMatch(List<String> expectedRequests, List<String> actualRequests) {
+        List<String> expectedSorted = new ArrayList<>(expectedRequests);
+        List<String> actualSorted = new ArrayList<>(actualRequests);
+        expectedSorted.sort(String::compareTo);
+        actualSorted.sort(String::compareTo);
+        assertEquals(expectedSorted, actualSorted);
     }
 
     protected void processOnLoadResponse(CoapResponse response, CoapTestClient client) {
@@ -266,6 +310,38 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
         @Override
         public void onError() {
             log.warn("Command Response Ack Error, No connect");
+        }
+    }
+
+    protected static class RecordingCoapCallback extends CoapTestCallback {
+
+        private final CopyOnWriteArrayList<String> rpcPayloads = new CopyOnWriteArrayList<>();
+
+        @Override
+        public void onLoad(CoapResponse response) {
+            super.onLoad(response);
+            if (response.getCode() != CoAP.ResponseCode.CONTENT) {
+                return;
+            }
+            byte[] payload = response.getPayload();
+            if (payload == null || payload.length == 0) {
+                return;
+            }
+            try {
+                rpcPayloads.add(JacksonUtil.toString(JacksonUtil.fromBytes(payload)));
+            } catch (Exception e) {
+                fail("Failed to decode CoAP RPC payload: " + e.getMessage());
+            }
+        }
+
+        public List<String> getRpcPayloads() {
+            return rpcPayloads;
+        }
+
+        public List<String> drainRpcPayloads() {
+            List<String> drained = new ArrayList<>(rpcPayloads);
+            rpcPayloads.clear();
+            return drained;
         }
     }
 }
