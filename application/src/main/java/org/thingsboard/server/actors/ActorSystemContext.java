@@ -36,6 +36,7 @@ import org.thingsboard.rule.engine.api.DeviceStateManager;
 import org.thingsboard.rule.engine.api.JobManager;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.rule.engine.api.MqttClientSettings;
+import org.thingsboard.rule.engine.api.TbHttpClientSettings;
 import org.thingsboard.rule.engine.api.NotificationCenter;
 import org.thingsboard.rule.engine.api.RuleEngineAiChatModelService;
 import org.thingsboard.rule.engine.api.SmsService;
@@ -622,11 +623,21 @@ public class ActorSystemContext {
     @Value("${actors.rule.external.ssrf_additional_blocked_hosts:}")
     private List<String> ssrfAdditionalBlockedHosts;
 
+    @Value("${actors.rule.external.ssrf_allowed_hosts:}")
+    private List<String> ssrfAllowedHosts;
+
     @PostConstruct
     public void init() {
         this.localCacheType = "caffeine".equals(cacheType);
         SsrfProtectionValidator.setEnabled(ssrfProtectionEnabled);
         SsrfProtectionValidator.setAdditionalBlockedHosts(ssrfAdditionalBlockedHosts);
+        SsrfProtectionValidator.setAllowedHosts(ssrfAllowedHosts);
+        if (!ssrfProtectionEnabled) {
+            log.warn("SSRF protection for external rule nodes is DISABLED. This allows rule chains to make HTTP requests to " +
+                    "internal/private network addresses including cloud metadata endpoints. It is strongly recommended to " +
+                    "enable SSRF protection by setting SSRF_PROTECTION_ENABLED=true. If your rule chains need to access " +
+                    "devices on local networks, use SSRF_ALLOWED_HOSTS to whitelist specific addresses or ranges.");
+        }
     }
 
     @Value("${actors.tenant.create_components_on_init:true}")
@@ -680,6 +691,10 @@ public class ActorSystemContext {
     @Autowired
     @Getter
     private MqttClientSettings mqttClientSettings;
+
+    @Autowired(required = false)
+    @Getter
+    private TbHttpClientSettings tbHttpClientSettings;
 
     @Getter
     @Setter

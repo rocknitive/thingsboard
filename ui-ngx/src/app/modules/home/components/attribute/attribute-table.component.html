@@ -34,7 +34,7 @@
         </div>
         <span class="flex-1"></span>
         <button mat-icon-button
-                *ngIf="attributeScope !== attributeScopeTypes.CLIENT_SCOPE"
+                *ngIf="attributeScope !== attributeScopeTypes.CLIENT_SCOPE && !disableAddTelemetry"
                 [disabled]="isLoading$ | async"
                 (click)="addAttribute($event)"
                 matTooltip="{{ 'action.add' | translate }}"
@@ -93,7 +93,8 @@
                 (click)="deleteTelemetry($event)">
           <mat-icon>delete</mat-icon>
         </button>
-        <button mat-raised-button color="accent"
+        <button [class.!hidden]="isSysAdmin"
+                mat-raised-button color="accent"
                 class="button-widget-action"
                 [disabled]="isLoading$ | async"
                 matTooltip="{{ 'attribute.show-on-widget' | translate }}"

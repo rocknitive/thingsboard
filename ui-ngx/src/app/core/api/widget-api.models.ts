@@ -67,6 +67,7 @@ import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { TbUnit } from '@shared/models/unit.models';
 import { UnitService } from '@core/services/unit.service';
+import { HttpOptionsResult, HttpUploadOptionsResult, QueryParams, RequestConfig } from '@core/http/http-utils';
 
 export interface TimewindowFunctions {
   onUpdateTimewindow: (startTimeMs: number, endTimeMs: number, interval?: number) => void;
@@ -94,6 +95,14 @@ export interface IWidgetUtils {
   getEntityDetailsPageURL: (id: string, entityType: EntityType) => string;
 }
 
+export interface IWidgetHttpUtils {
+  defaultHttpOptions: (ignoreLoading?: boolean, ignoreErrors?: boolean, resendRequest?: boolean, queryParams?: QueryParams) => HttpOptionsResult;
+  defaultHttpOptionsFromConfig: (config?: RequestConfig) => HttpOptionsResult;
+  defaultHttpOptionsFromParams: (queryParams?: QueryParams, config?: RequestConfig) => HttpOptionsResult;
+  defaultHttpUploadOptions: (ignoreLoading?: boolean, ignoreErrors?: boolean, resendRequest?: boolean, queryParams?: QueryParams) => HttpUploadOptionsResult;
+  createDefaultHttpOptions: (queryParamsOrConfig?: QueryParams | RequestConfig, config?: RequestConfig) => HttpOptionsResult;
+}
+
 export interface PlaceMapItemActionData {
   action: WidgetAction | WidgetActionDescriptor;
   additionalParams?: any;
@@ -110,6 +119,7 @@ export interface WidgetActionsApi {
   elementClick: ($event: Event) => void;
   cardClick: ($event: Event) => void;
   click: ($event: Event) => void;
+  invokeAction: ($event: Event, actionName: string, additionalParams?: any) => void;
   getActiveEntityInfo: () => SubscriptionEntityInfo;
   openDashboardStateInSeparateDialog: (targetDashboardStateId: string, params?: StateParams, dialogTitle?: string,
                                        hideDashboardToolbar?: boolean, dialogWidth?: number, dialogHeight?: number) => MatDialogRef<any>;

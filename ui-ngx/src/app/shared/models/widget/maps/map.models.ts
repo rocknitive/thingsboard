@@ -200,9 +200,11 @@ export const defaultBaseDataLayerSettings = (mapType: MapType): Partial<MapDataL
   }
 })
 
-export type MapDataLayerType = 'trips' | 'markers' | 'polygons' | 'circles' | 'polylines';
+export const mapDataLayerTypes = ['trips', 'markers', 'polygons', 'circles', 'polylines'] as const;
 
-export const mapDataLayerTypes: MapDataLayerType[] = ['trips', 'markers', 'polygons', 'circles', 'polylines'];
+export type MapDataLayerType = typeof mapDataLayerTypes[number];
+
+export const latestMapDataLayerTypes: MapDataLayerType[] = ['markers', 'polygons', 'circles', 'polylines'];
 
 export const mapDataLayerValid = (dataLayer: MapDataLayerSettings, type: MapDataLayerType): boolean => {
   if (!dataLayer.dsType || ![DatasourceType.function, DatasourceType.device, DatasourceType.entity].includes(dataLayer.dsType)) {
@@ -1210,6 +1212,8 @@ export interface ImageMapSourceSettings {
   entityAliasId?: string;
   entityKey?: DataKey;
 }
+
+export const WEBGL_ERROR_EVENT = 'gl-error';
 
 export const imageMapSourceSettingsValid = (imageSource: ImageMapSourceSettings): boolean => {
   if (!imageSource?.sourceType) {

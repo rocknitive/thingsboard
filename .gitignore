@@ -37,4 +37,6 @@ rebuild-docker.sh
 */.run/**
 .run/**
 .run
-.claude/
+.claude
+.planning
+docs/superpowers/

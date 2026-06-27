@@ -16,6 +16,7 @@
 
 import * as AngularAnimations from '@angular/animations';
 import * as AngularCore from '@angular/core';
+import * as AngularCoreRxjsInterop from '@angular/core/rxjs-interop';
 import * as AngularCommon from '@angular/common';
 import * as AngularForms from '@angular/forms';
 import * as AngularPlatformBrowser from '@angular/platform-browser';
@@ -178,7 +179,6 @@ import * as HistorySelectorComponent from '@shared/components/time/history-selec
 import * as EntityGatewaySelectComponent from '@shared/components/entity/entity-gateway-select.component';
 import * as ContactComponent from '@shared/components/contact.component';
 import * as OtaPackageAutocompleteComponent from '@shared/components/ota-package/ota-package-autocomplete.component';
-import * as WidgetsBundleSearchComponent from '@shared/components/widgets-bundle-search.component';
 import * as CopyButtonComponent from '@shared/components/button/copy-button.component';
 import * as TogglePasswordComponent from '@shared/components/button/toggle-password.component';
 import * as WidgetButtonComponent from '@shared/components/button/widget-button.component';
@@ -325,7 +325,6 @@ import * as DashboardStateDialogComponent from '@home/components/dashboard-page/
 import * as EmbedDashboardDialogComponent from '@home/components/widget/dialog/embed-dashboard-dialog.component';
 import * as EdgeDownlinkTableComponent from '@home/components/edge/edge-downlink-table.component';
 import * as EdgeDownlinkTableHeaderComponent from '@home/components/edge/edge-downlink-table-header.component';
-import * as DisplayWidgetTypesPanelComponent from '@home/components/dashboard-page/widget-types-panel.component';
 import * as AlarmDurationPredicateValueComponent from '@home/components/profile/alarm/alarm-duration-predicate-value.component';
 import * as DashboardImageDialogComponent from '@home/components/dashboard-page/dashboard-image-dialog.component';
 import * as WidgetContainerComponent from '@home/components/widget/widget-container.component';
@@ -355,6 +354,7 @@ class ModulesMap implements IModulesMap {
   private modulesMap: {[key: string]: any} = {
     '@angular/animations': AngularAnimations,
     '@angular/core': this.angularCoreModule20to18Patch(AngularCore),
+    '@angular/core/rxjs-interop': AngularCoreRxjsInterop,
     '@angular/common': AngularCommon,
     '@angular/common/http': HttpClientModule,
     '@angular/forms': AngularForms,
@@ -528,7 +528,6 @@ class ModulesMap implements IModulesMap {
     '@shared/components/entity/entity-gateway-select.component': EntityGatewaySelectComponent,
     '@shared/components/contact.component': ContactComponent,
     '@shared/components/ota-package/ota-package-autocomplete.component': OtaPackageAutocompleteComponent,
-    '@shared/components/widgets-bundle-search.component': WidgetsBundleSearchComponent,
     '@shared/components/button/copy-button.component': CopyButtonComponent,
     '@shared/components/button/toggle-password.component': TogglePasswordComponent,
     '@shared/components/button/widget-button.component': WidgetButtonComponent,
@@ -677,7 +676,6 @@ class ModulesMap implements IModulesMap {
     '@home/components/widget/dialog/embed-dashboard-dialog.component': EmbedDashboardDialogComponent,
     '@home/components/edge/edge-downlink-table.component': EdgeDownlinkTableComponent,
     '@home/components/edge/edge-downlink-table-header.component': EdgeDownlinkTableHeaderComponent,
-    '@home/components/dashboard-page/widget-types-panel.component': DisplayWidgetTypesPanelComponent,
     '@home/components/profile/alarm/alarm-duration-predicate-value.component': AlarmDurationPredicateValueComponent,
     '@home/components/dashboard-page/dashboard-image-dialog.component': DashboardImageDialogComponent,
     '@home/components/widget/widget-container.component': WidgetContainerComponent,

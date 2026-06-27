@@ -730,6 +730,7 @@ public class ModelConstants {
     public static final String CALCULATED_FIELD_CONFIGURATION_VERSION = "configuration_version";
     public static final String CALCULATED_FIELD_CONFIGURATION = "configuration";
     public static final String CALCULATED_FIELD_VERSION = "version";
+    public static final String CALCULATED_FIELD_ADDITIONAL_INFO = ADDITIONAL_INFO_PROPERTY;
 
     /**
      * Tasks constants.
@@ -761,6 +762,18 @@ public class ModelConstants {
     public static final String API_KEY_EXPIRATION_TIME_COLUMN_NAME = "expiration_time";
     public static final String API_KEY_ENABLED_COLUMN_NAME = "enabled";
     public static final String API_KEY_DESCRIPTION_COLUMN_NAME = "description";
+
+    /**
+     * IoT Hub installed item constants.
+     */
+    public static final String IOT_HUB_INSTALLED_ITEM_TABLE_NAME = "iot_hub_installed_item";
+    public static final String IOT_HUB_INSTALLED_ITEM_TENANT_ID_COLUMN = TENANT_ID_COLUMN;
+    public static final String IOT_HUB_INSTALLED_ITEM_ITEM_ID_COLUMN = "item_id";
+    public static final String IOT_HUB_INSTALLED_ITEM_ITEM_VERSION_ID_COLUMN = "item_version_id";
+    public static final String IOT_HUB_INSTALLED_ITEM_ITEM_NAME_COLUMN = "item_name";
+    public static final String IOT_HUB_INSTALLED_ITEM_ITEM_TYPE_COLUMN = "item_type";
+    public static final String IOT_HUB_INSTALLED_ITEM_VERSION_COLUMN = "version";
+    public static final String IOT_HUB_INSTALLED_ITEM_DESCRIPTOR_COLUMN = "descriptor";
 
     protected static final String[] NONE_AGGREGATION_COLUMNS = new String[]{LONG_VALUE_COLUMN, DOUBLE_VALUE_COLUMN, BOOLEAN_VALUE_COLUMN, STRING_VALUE_COLUMN, JSON_VALUE_COLUMN, KEY_COLUMN, TS_COLUMN};
 
