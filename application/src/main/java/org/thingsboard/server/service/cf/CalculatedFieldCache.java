@@ -41,7 +41,7 @@ public interface CalculatedFieldCache {
 
     List<CalculatedFieldCtx> getCalculatedFieldCtxsByEntityId(EntityId entityId);
 
-    Stream<CalculatedFieldCtx> getCalculatedFieldCtxsByType(CalculatedFieldType cfType);
+    Stream<CalculatedFieldCtx> getCalculatedFieldCtxsByType(TenantId tenantId, CalculatedFieldType cfType);
 
     boolean hasCalculatedFields(TenantId tenantId, EntityId entityId, Predicate<CalculatedFieldCtx> filter);
 
@@ -61,7 +61,7 @@ public interface CalculatedFieldCache {
 
     void addOwnerEntity(TenantId tenantId, EntityId entityId);
 
-    void evictEntity(EntityId entityId);
+    void evictOwnerEntity(EntityId entityId);
 
     void evictOwner(EntityId owner);
 

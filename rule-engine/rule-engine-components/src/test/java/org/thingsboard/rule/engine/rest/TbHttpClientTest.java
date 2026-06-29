@@ -22,10 +22,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.util.LinkedMultiValueMap;
+import org.thingsboard.common.util.DirectListeningExecutor;
 import org.thingsboard.rule.engine.api.TbContext;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -54,6 +56,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+@ResourceLock("SsrfProtectionValidator") // to avoid race conditions when modifying SsrfProtectionValidator's static configuration
 public class TbHttpClientTest {
 
     EventLoopGroup eventLoop;
@@ -154,6 +157,7 @@ public class TbHttpClientTest {
                 .build();
 
         var ctx = mock(TbContext.class);
+        when(ctx.getExternalCallExecutor()).thenReturn(DirectListeningExecutor.INSTANCE);
         when(ctx.transformMsg(
                 eq(msg),
                 eq(msg.getMetaData()),
