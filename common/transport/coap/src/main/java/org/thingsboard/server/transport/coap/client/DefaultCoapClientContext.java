@@ -636,6 +636,10 @@ public class DefaultCoapClientContext implements CoapClientContext {
         sendQueuedRpc(state, pendingDelivery);
     }
 
+    private void scheduleNextQueuedRpc(TbCoapClientState state) {
+        transportContext.getScheduler().schedule(() -> processNextQueuedRpc(state), 0, TimeUnit.MILLISECONDS);
+    }
+
     private void sendQueuedRpc(TbCoapClientState state, PendingRpcDelivery delivery) {
         TbCoapObservationState rpcState = delivery.rpcState();
         TransportProtos.ToDeviceRpcRequestMsg msg = delivery.msg();
@@ -644,6 +648,7 @@ public class DefaultCoapClientContext implements CoapClientContext {
         boolean sent = false;
         boolean markInFlightCompleted = true;
         String error = null;
+        String awaitingAckKey = null;
         boolean conRequest = AbstractSyncSessionCallback.isConRequest(rpcState);
         boolean isMulticastRequest = AbstractSyncSessionCallback.isMulticastRequest(rpcState);
         int requestId = getNextMsgId(isMulticastRequest);
@@ -665,10 +670,11 @@ public class DefaultCoapClientContext implements CoapClientContext {
                     }
                 }
 
-                String awaitingAckKey = getAwaitingAckKey(sessionId, requestId);
-                transportContext.getRpcAwaitingAck().put(awaitingAckKey, msg);
+                String key = getAwaitingAckKey(sessionId, requestId);
+                awaitingAckKey = key;
+                transportContext.getRpcAwaitingAck().put(key, msg);
                 transportContext.getScheduler().schedule(() -> {
-                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(key);
                     if (rpcRequestMsg != null) {
                         log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update due to server timeout ...", deviceId, sessionId, requestId);
                         transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
@@ -677,14 +683,14 @@ public class DefaultCoapClientContext implements CoapClientContext {
                 }, Math.min(getTimeout(state, powerMode, profileSettings), msg.getExpirationTime() - System.currentTimeMillis()), TimeUnit.MILLISECONDS);
 
                 response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> {
-                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(key);
                     if (rpcRequestMsg != null) {
                         log.trace("[{}][{}][{}] Going to send to device actor RPC request DELIVERED status update ...", deviceId, sessionId, requestId);
                         transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.DELIVERED, true, TransportServiceCallback.EMPTY);
                         onRpcDeliveryFinished(state, rpcState);
                     }
                 }, id -> {
-                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(awaitingAckKey);
+                    TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(key);
                     if (rpcRequestMsg != null) {
                         log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update ...", deviceId, sessionId, requestId);
                         transportService.process(state.getSession(), rpcRequestMsg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
@@ -706,6 +712,9 @@ public class DefaultCoapClientContext implements CoapClientContext {
         } catch (Exception e) {
             error = "Internal error: " + e.getMessage();
         } finally {
+            if (StringUtils.isNotEmpty(error) && awaitingAckKey != null && transportContext.getRpcAwaitingAck().remove(awaitingAckKey) != null) {
+                markInFlightCompleted = true;
+            }
             if (StringUtils.isNotEmpty(error)) {
                 transportService.process(state.getSession(),
                         TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
@@ -734,7 +743,7 @@ public class DefaultCoapClientContext implements CoapClientContext {
         } finally {
             state.unlock();
         }
-        processNextQueuedRpc(state);
+        scheduleNextQueuedRpc(state);
     }
 
     private String getAwaitingAckKey(UUID sessionId, int requestId) {

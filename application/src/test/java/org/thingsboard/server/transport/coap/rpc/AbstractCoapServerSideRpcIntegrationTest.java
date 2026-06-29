@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
@@ -176,7 +177,8 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
         CoapObserveRelation firstRelation = client.getObserveRelation(callback);
         await("await first replay subscription")
                 .atMost(DEFAULT_WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .until(() -> callback.getRpcPayloads().size() == expectedRequests.size());
+                .until(() -> callback.hasNoFailure() && callback.getRpcPayloads().size() == expectedRequests.size());
+        callback.assertNoFailure();
         assertRequestsMatch(expectedRequests, callback.drainRpcPayloads());
 
         firstRelation.proactiveCancel();
@@ -185,7 +187,8 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
         CoapObserveRelation secondRelation = client.getObserveRelation(callback);
         await("await second replay subscription")
                 .atMost(DEFAULT_WAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .until(() -> callback.getRpcPayloads().size() == expectedRequests.size());
+                .until(() -> callback.hasNoFailure() && callback.getRpcPayloads().size() == expectedRequests.size());
+        callback.assertNoFailure();
         assertRequestsMatch(expectedRequests, callback.drainRpcPayloads());
 
         secondRelation.proactiveCancel();
@@ -316,6 +319,7 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
     protected static class RecordingCoapCallback extends CoapTestCallback {
 
         private final CopyOnWriteArrayList<String> rpcPayloads = new CopyOnWriteArrayList<>();
+        private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
         @Override
         public void onLoad(CoapResponse response) {
@@ -330,7 +334,18 @@ public abstract class AbstractCoapServerSideRpcIntegrationTest extends AbstractC
             try {
                 rpcPayloads.add(JacksonUtil.toString(JacksonUtil.fromBytes(payload)));
             } catch (Exception e) {
-                fail("Failed to decode CoAP RPC payload: " + e.getMessage());
+                failure.compareAndSet(null, e);
+            }
+        }
+
+        public boolean hasNoFailure() {
+            return failure.get() == null;
+        }
+
+        public void assertNoFailure() {
+            Throwable t = failure.get();
+            if (t != null) {
+                throw new AssertionError("Failed to decode CoAP RPC payload", t);
             }
         }
 
