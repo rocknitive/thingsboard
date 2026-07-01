@@ -271,7 +271,7 @@ public class DefaultCoapClientContext implements CoapClientContext {
             }
 
             timeout = psmActivityTimer;
-        } else {
+        } else if (PowerMode.E_DRX.equals(powerMode)) {
             Long pagingTransmissionWindow = client.getPagingTransmissionWindow();
             if (pagingTransmissionWindow == null && profileSettings != null) {
                 pagingTransmissionWindow = profileSettings.getPagingTransmissionWindow();
@@ -281,8 +281,20 @@ public class DefaultCoapClientContext implements CoapClientContext {
                 pagingTransmissionWindow = transportContext.getPagingTransmissionWindow();
             }
             timeout = pagingTransmissionWindow;
+        } else {
+            timeout = Long.MAX_VALUE;
         }
         return timeout;
+    }
+
+    private long getRpcDeliveryTimeout(TbCoapClientState client, PowerMode powerMode, PowerSavingConfiguration profileSettings, long expirationRemaining) {
+        if (expirationRemaining <= 0) {
+            return 0;
+        }
+        if (powerMode == null || PowerMode.DRX.equals(powerMode)) {
+            return expirationRemaining;
+        }
+        return Math.min(getTimeout(client, powerMode, profileSettings), expirationRemaining);
     }
 
     private boolean registerFeatureObservation(TbCoapClientState state, String token, CoapExchange exchange, FeatureType featureType) {
@@ -601,13 +613,14 @@ public class DefaultCoapClientContext implements CoapClientContext {
                     }
 
                     transportContext.getRpcAwaitingAck().put(requestId, msg);
+                    long expirationRemaining = msg.getExpirationTime() - System.currentTimeMillis();
                     transportContext.getScheduler().schedule(() -> {
                         TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(requestId);
                         if (rpcRequestMsg != null) {
                             log.trace("[{}][{}][{}] Going to send to device actor RPC request TIMEOUT status update due to server timeout ...", deviceId, sessionId, requestId);
                             transportService.process(state.getSession(), msg, RpcStatus.TIMEOUT, TransportServiceCallback.EMPTY);
                         }
-                    }, Math.min(getTimeout(state, powerMode, profileSettings), msg.getExpirationTime() - System.currentTimeMillis()), TimeUnit.MILLISECONDS);
+                    }, getRpcDeliveryTimeout(state, powerMode, profileSettings, expirationRemaining), TimeUnit.MILLISECONDS);
 
                     response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> {
                         TransportProtos.ToDeviceRpcRequestMsg rpcRequestMsg = transportContext.getRpcAwaitingAck().remove(id);
