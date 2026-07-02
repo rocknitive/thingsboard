@@ -194,6 +194,14 @@ coap:
   bind_address: "${COAP_BIND_ADDRESS:0.0.0.0}"
   # CoAP bind port
   bind_port: "${COAP_BIND_PORT:5683}"
+  # In this section you can specify custom parameters for CoAP network configuration and expose the env variables to configure outside
+  network_config:
+    - key: "COAP.ACK_TIMEOUT"
+      value: "${COAP_ACK_TIMEOUT:2[s]}"
+    - key: "COAP.MAX_ACK_TIMEOUT"
+      value: "${COAP_MAX_ACK_TIMEOUT:1[min]}"
+    - key: "COAP.MAX_TRANSMIT_WAIT"
+      value: "${COAP_MAX_TRANSMIT_WAIT:93[s]}"
   dtls:
     # Enable/disable DTLS 1.2 support
     enabled: "${COAP_DTLS_ENABLED:false}"

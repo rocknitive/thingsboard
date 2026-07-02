@@ -23,17 +23,20 @@ import org.eclipse.californium.core.config.CoapConfig;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.server.resources.Resource;
 import org.eclipse.californium.elements.config.Configuration;
+import org.eclipse.californium.elements.config.UdpConfig;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.eclipse.californium.scandium.config.DtlsConnectorConfig;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.common.util.ThingsBoardExecutors;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -163,6 +166,9 @@ public class DefaultCoapServerService implements CoapServerService, SmartInitial
     }
 
     private Configuration createNetworkConfiguration() {
+        log.info("Creating CoAP network configuration...");
+        CoapConfig.register();
+        UdpConfig.register();
         Configuration networkConfig = new Configuration();
         networkConfig.set(CoapConfig.BLOCKWISE_STRICT_BLOCK2_OPTION, true);
         networkConfig.set(CoapConfig.BLOCKWISE_ENTITY_TOO_LARGE_AUTO_FAILOVER, true);
@@ -172,6 +178,15 @@ public class DefaultCoapServerService implements CoapServerService, SmartInitial
         networkConfig.set(CoapConfig.PREFERRED_BLOCK_SIZE, 1024);
         networkConfig.set(CoapConfig.MAX_MESSAGE_SIZE, 1024);
         networkConfig.set(CoapConfig.MAX_RETRANSMIT, 4);
+        if (!CollectionUtils.isEmpty(coapServerContext.getNetworkConfig())) {
+            Properties networkProps = new Properties();
+            coapServerContext.getNetworkConfig().forEach(p -> {
+                log.info("Custom CoAP network parameter: {} = {}", p.getKey(), p.getValue());
+                networkProps.put(p.getKey(), p.getValue());
+            });
+            log.info("Custom CoAP network parameters: {}", networkProps.size());
+            networkConfig.add(networkProps);
+        }
         networkConfig.set(CoapConfig.COAP_PORT, coapServerContext.getPort());
         return networkConfig;
     }

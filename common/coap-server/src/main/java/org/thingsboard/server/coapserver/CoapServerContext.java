@@ -16,14 +16,20 @@
 package org.thingsboard.server.coapserver;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.common.data.TbProperty;
+
+import java.util.List;
 
 @Slf4j
 @TbCoapServerComponent
 @Component
+@ConfigurationProperties(prefix = "coap")
 public class CoapServerContext {
 
     @Getter
@@ -33,6 +39,10 @@ public class CoapServerContext {
     @Getter
     @Value("${coap.bind_port}")
     private Integer port;
+
+    @Getter
+    @Setter
+    private List<TbProperty> networkConfig;
 
     @Getter
     @Autowired(required = false)
