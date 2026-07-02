@@ -16,18 +16,21 @@
 package org.thingsboard.server.transport.coap;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.californium.core.coap.MessageObserver;
 import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.elements.EndpointContext;
 
 import java.util.function.Consumer;
 
+@Slf4j
 @RequiredArgsConstructor
 public class TbCoapMessageObserver implements MessageObserver {
 
     private final int msgId;
     private final Consumer<Integer> onAcknowledge;
     private final Consumer<Integer> onTimeout;
+    private final String context;
 
     @Override
     public boolean isInternal() {
@@ -36,7 +39,7 @@ public class TbCoapMessageObserver implements MessageObserver {
 
     @Override
     public void onRetransmission() {
-
+        log.info("[{}][mid={}] Californium requested retransmission", context, msgId);
     }
 
     @Override
@@ -46,16 +49,18 @@ public class TbCoapMessageObserver implements MessageObserver {
 
     @Override
     public void onAcknowledgement() {
+        log.info("[{}][mid={}] ACK received", context, msgId);
         onAcknowledge.accept(msgId);
     }
 
     @Override
     public void onReject() {
-
+        log.info("[{}][mid={}] Message rejected", context, msgId);
     }
 
     @Override
     public void onTimeout() {
+        log.info("[{}][mid={}] Message timed out", context, msgId);
         if (onTimeout != null) {
             onTimeout.accept(msgId);
         }
@@ -63,7 +68,7 @@ public class TbCoapMessageObserver implements MessageObserver {
 
     @Override
     public void onCancel() {
-
+        log.info("[{}][mid={}] Message canceled", context, msgId);
     }
 
     @Override
@@ -78,31 +83,32 @@ public class TbCoapMessageObserver implements MessageObserver {
 
     @Override
     public void onDtlsRetransmission(int flight) {
-
+        log.info("[{}][mid={}] DTLS retransmission flight {}", context, msgId, flight);
     }
 
     @Override
     public void onSent(boolean retransmission) {
-
+        log.info("[{}][mid={}] Message sent (retransmission={})", context, msgId, retransmission);
     }
 
     @Override
     public void onSendError(Throwable error) {
-
+        log.warn("[{}][mid={}] Send error", context, msgId, error);
     }
 
     @Override
     public void onResponseHandlingError(Throwable cause) {
-
+        log.warn("[{}][mid={}] Response handling error", context, msgId, cause);
     }
 
     @Override
     public void onContextEstablished(EndpointContext endpointContext) {
-
+        log.info("[{}][mid={}] Endpoint context established for peer {}", context, msgId,
+                endpointContext != null ? endpointContext.getPeerAddress() : null);
     }
 
     @Override
     public void onTransferComplete() {
-
+        log.info("[{}][mid={}] Transfer complete", context, msgId);
     }
 }

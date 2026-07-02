@@ -447,7 +447,9 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
             Request request = relation.getExchange().getRequest();
             String token = getTokenFromRequest(request);
             clients.registerObserveRelation(token, relation);
-            log.trace("Added Observe relation for token: {}", token);
+            log.info("Added observe relation: token={}, peer={}, uri={}, requestType={}", token,
+                    request.getSourceContext() != null ? request.getSourceContext().getPeerAddress() : null,
+                    request.getURI(), request.getType());
         }
 
         @Override
@@ -455,7 +457,9 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
             Request request = relation.getExchange().getRequest();
             String token = getTokenFromRequest(request);
             clients.deregisterObserveRelation(token);
-            log.trace("Relation removed for token: {}", token);
+            log.info("Removed observe relation: token={}, peer={}, uri={}, requestType={}", token,
+                    request.getSourceContext() != null ? request.getSourceContext().getPeerAddress() : null,
+                    request.getURI(), request.getType());
         }
     }
 
