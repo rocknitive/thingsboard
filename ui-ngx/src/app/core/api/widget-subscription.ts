@@ -872,7 +872,8 @@ export class WidgetSubscription implements IWidgetSubscription {
                   switchMap(() => this.ctx.deviceService.getPersistedRpc(response.rpcId, true)),
                   filter(persistentRespons =>
                     (oneWayElseTwoWay && persistentRespons.status === RpcStatus.DELIVERED) ||
-                    (persistentRespons.status !== RpcStatus.DELIVERED && persistentRespons.status !== RpcStatus.QUEUED)),
+                    (persistentRespons.status !== RpcStatus.DELIVERED && persistentRespons.status !== RpcStatus.QUEUED
+                      && persistentRespons.status !== RpcStatus.SENT)),
                   switchMap(persistentResponse => {
                     if ([RpcStatus.TIMEOUT, RpcStatus.EXPIRED].includes(persistentResponse.status)) {
                       return throwError(() => ({status: 504}));
