@@ -1456,6 +1456,14 @@ coap:
   bind_address: "${COAP_BIND_ADDRESS:0.0.0.0}"
   # CoAP bind port
   bind_port: "${COAP_BIND_PORT:5683}"
+  # In this section you can specify custom parameters for CoAP network configuration and expose the env variables to configure outside
+  network_config:
+    - key: "COAP.ACK_TIMEOUT"
+      value: "${COAP_ACK_TIMEOUT:2[s]}"
+    - key: "COAP.MAX_ACK_TIMEOUT"
+      value: "${COAP_MAX_ACK_TIMEOUT:1[min]}"
+    - key: "COAP.MAX_TRANSMIT_WAIT"
+      value: "${COAP_MAX_TRANSMIT_WAIT:93[s]}"
   dtls:
     # Enable/disable DTLS 1.2 support
     enabled: "${COAP_DTLS_ENABLED:false}"
@@ -1948,7 +1956,7 @@ queue:
     api:
       # Whether to forward entity data query requests to EDQS (otherwise use PostgreSQL implementation)
       supported: "${TB_EDQS_API_SUPPORTED:false}"
-      # Whether to auto-enable EDQS API (if queue.edqs.api.supported is true) when sync of data to Kafka is finished 
+      # Whether to auto-enable EDQS API (if queue.edqs.api.supported is true) when sync of data to Kafka is finished
       auto_enable: "${TB_EDQS_API_AUTO_ENABLE:true}"
     # Interval in milliseconds to check for ready EDQS servers
     readiness_check_interval: "${TB_EDQS_READINESS_CHECK_INTERVAL_MS:60000}"
