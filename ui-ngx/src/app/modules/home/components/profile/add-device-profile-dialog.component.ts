@@ -54,10 +54,11 @@ export interface AddDeviceProfileDialogData {
 }
 
 @Component({
-  selector: 'tb-add-device-profile-dialog',
-  templateUrl: './add-device-profile-dialog.component.html',
-  providers: [],
-  styleUrls: ['./add-device-profile-dialog.component.scss']
+    selector: 'tb-add-device-profile-dialog',
+    templateUrl: './add-device-profile-dialog.component.html',
+    providers: [],
+    styleUrls: ['./add-device-profile-dialog.component.scss'],
+    standalone: false
 })
 export class AddDeviceProfileDialogComponent extends
   DialogComponent<AddDeviceProfileDialogComponent, DeviceProfile> {
@@ -216,8 +217,6 @@ export class AddDeviceProfileDialogComponent extends
       case 1:
         return 'device-profile.transport-configuration';
       case 2:
-        return 'device-profile.alarm-rules';
-      case 3:
         return 'device-profile.device-provisioning';
     }
   }

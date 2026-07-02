@@ -32,24 +32,26 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { FlowDirective } from '@flowjs/ngx-flow';
+import { FlowConfig } from '@flowjs/ngx-flow';
 import { TranslateService } from '@ngx-translate/core';
 import { UtilsService } from '@core/services/utils.service';
 import { DialogService } from '@core/services/dialog.service';
 import { FileSizePipe } from '@shared/pipe/file-size.pipe';
 import { coerceBoolean } from '@shared/decorators/coercion';
+import { bytesToString } from '@core/utils';
 
 @Component({
-  selector: 'tb-file-input',
-  templateUrl: './file-input.component.html',
-  styleUrls: ['./file-input.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => FileInputComponent),
-      multi: true
-    }
-  ]
+    selector: 'tb-file-input',
+    templateUrl: './file-input.component.html',
+    styleUrls: ['./file-input.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => FileInputComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class FileInputComponent extends PageComponent implements AfterViewInit, OnDestroy, ControlValueAccessor, OnChanges {
 
@@ -139,7 +141,7 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
   mediaType: string;
 
   @ViewChild('flow', {static: true})
-  flow: FlowDirective;
+  flow: FlowConfig;
 
   @ViewChild('flowInput', {static: true})
   flowInput: ElementRef;
@@ -215,32 +217,37 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        let fileName = null;
-        let fileContent = null;
-        let mediaType = null;
-        if (reader.readyState === reader.DONE) {
-          fileContent = reader.result;
-          if (fileContent && fileContent.length > 0) {
-            if (this.contentConvertFunction) {
-              fileContent = this.contentConvertFunction(fileContent);
-            }
-            fileName = fileContent ? file.name : null;
-            mediaType = file?.file?.type || null;
-          }
-        }
-        resolve({fileContent, fileName, files: null, mediaType});
-      };
-      reader.onerror = () => {
-        resolve({fileContent: null, fileName: null, files: null, mediaType: null});
-      };
+      const onReadError = () => resolve({fileContent: null, fileName: null, files: null, mediaType: null});
+
       if (this.readAsBinary) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const content = reader.readyState === reader.DONE ? reader.result : null;
+          resolve(this.buildResult(file, content));
+        };
+        reader.onerror = onReadError;
         reader.readAsBinaryString(file.file);
       } else {
-        reader.readAsText(file.file);
+        file.file.arrayBuffer().then(
+          buf => resolve(this.buildResult(file, bytesToString(new Uint8Array(buf)))),
+          onReadError
+        );
       }
     });
+  }
+
+  private buildResult(file: flowjs.FlowFile, content: string | ArrayBuffer): any {
+    let fileContent: any = content;
+    let fileName = null;
+    let mediaType = null;
+    if (fileContent && fileContent.length > 0) {
+      if (this.contentConvertFunction) {
+        fileContent = this.contentConvertFunction(fileContent);
+      }
+      fileName = fileContent ? file.name : null;
+      mediaType = file?.file?.type || null;
+    }
+    return {fileContent, fileName, files: null, mediaType};
   }
 
   private checkMaxSize(file: flowjs.FlowFile): boolean {

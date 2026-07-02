@@ -21,9 +21,10 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { AssetProfile } from '@shared/models/asset.models';
 
 @Component({
-  selector: 'tb-asset-profile-tabs',
-  templateUrl: './asset-profile-tabs.component.html',
-  styleUrls: []
+    selector: 'tb-asset-profile-tabs',
+    templateUrl: './asset-profile-tabs.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class AssetProfileTabsComponent extends EntityTabsComponent<AssetProfile> {
 
@@ -33,6 +34,14 @@ export class AssetProfileTabsComponent extends EntityTabsComponent<AssetProfile>
 
   ngOnInit() {
     super.ngOnInit();
+  }
+
+  resolveTabIndex(tab: string): number {
+    if (tab === 'cf') {
+      return 1;
+    } else {
+      return super.resolveTabIndex(tab);
+    }
   }
 
 }

@@ -22,9 +22,10 @@ import { AssetInfo } from '@app/shared/models/asset.models';
 import { EntityId } from "@shared/models/id/entity-id";
 
 @Component({
-  selector: 'tb-asset-tabs',
-  templateUrl: './asset-tabs.component.html',
-  styleUrls: []
+    selector: 'tb-asset-tabs',
+    templateUrl: './asset-tabs.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class AssetTabsComponent extends EntityTabsComponent<AssetInfo> {
 
@@ -36,6 +37,14 @@ export class AssetTabsComponent extends EntityTabsComponent<AssetInfo> {
 
   ngOnInit() {
     super.ngOnInit();
+  }
+
+  resolveTabIndex(tab: string): number {
+    if (tab === 'cf') {
+      return 3;
+    } else {
+      return super.resolveTabIndex(tab);
+    }
   }
 
   protected setEntity(entity: AssetInfo) {

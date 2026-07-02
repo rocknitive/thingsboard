@@ -31,11 +31,13 @@ import {
   barChartWithLabelsDefaultSettings
 } from '@home/components/widget/lib/chart/bar-chart-with-labels-widget.models';
 import { getSourceTbUnitSymbol } from '@shared/models/unit.models';
+import { updateLatestDataKeys } from '@home/components/widget/lib/chart/time-series-chart.models';
 
 @Component({
-  selector: 'tb-bar-chart-with-labels-widget-settings',
-  templateUrl: './bar-chart-with-labels-widget-settings.component.html',
-  styleUrls: ['./../widget-settings.scss']
+    selector: 'tb-bar-chart-with-labels-widget-settings',
+    templateUrl: './bar-chart-with-labels-widget-settings.component.html',
+    styleUrls: ['./../widget-settings.scss'],
+    standalone: false
 })
 export class BarChartWithLabelsWidgetSettingsComponent extends WidgetSettingsComponent {
 
@@ -76,6 +78,7 @@ export class BarChartWithLabelsWidgetSettingsComponent extends WidgetSettingsCom
     this.barChartWidgetSettingsForm = this.fb.group({
 
       dataZoom: [settings.dataZoom, []],
+      dataZoomUpdateTimewindow: [settings.dataZoomUpdateTimewindow, []],
 
       showBarLabel: [settings.showBarLabel, []],
       barLabelFont: [settings.barLabelFont, []],
@@ -122,17 +125,29 @@ export class BarChartWithLabelsWidgetSettingsComponent extends WidgetSettingsCom
     });
   }
 
+  protected onSettingsChanged(updated: WidgetSettings) {
+    updateLatestDataKeys([updated.yAxis], this.datasource, this.dataKeyCallbacks);
+    super.onSettingsChanged(updated);
+  }
+
   protected validatorTriggers(): string[] {
-    return ['showBarLabel', 'showBarValue', 'showBarBorder', 'showLegend', 'showTooltip', 'tooltipShowDate'];
+    return ['dataZoom', 'showBarLabel', 'showBarValue', 'showBarBorder', 'showLegend', 'showTooltip', 'tooltipShowDate'];
   }
 
   protected updateValidators(emitEvent: boolean) {
+    const dataZoom: boolean = this.barChartWidgetSettingsForm.get('dataZoom').value;
     const showBarLabel: boolean = this.barChartWidgetSettingsForm.get('showBarLabel').value;
     const showBarValue: boolean = this.barChartWidgetSettingsForm.get('showBarValue').value;
     const showBarBorder: boolean = this.barChartWidgetSettingsForm.get('showBarBorder').value;
     const showLegend: boolean = this.barChartWidgetSettingsForm.get('showLegend').value;
     const showTooltip: boolean = this.barChartWidgetSettingsForm.get('showTooltip').value;
     const tooltipShowDate: boolean = this.barChartWidgetSettingsForm.get('tooltipShowDate').value;
+
+    if (dataZoom) {
+      this.barChartWidgetSettingsForm.get('dataZoomUpdateTimewindow').enable();
+    } else {
+      this.barChartWidgetSettingsForm.get('dataZoomUpdateTimewindow').disable();
+    }
 
     if (showBarLabel) {
       this.barChartWidgetSettingsForm.get('barLabelFont').enable();

@@ -27,13 +27,17 @@ import { base64toObj, objToBase64 } from '@app/core/utils';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
 import { EntityService } from '@core/http/entity.service';
 import { MobileService } from '@core/services/mobile.service';
+import { BreadcrumbService } from '@core/services/breadcrumb.service';
 
 @Component({
-  selector: 'tb-default-state-controller',
-  templateUrl: './default-state-controller.component.html',
-  styleUrls: ['./default-state-controller.component.scss']
+    selector: 'tb-default-state-controller',
+    templateUrl: './default-state-controller.component.html',
+    styleUrls: ['./default-state-controller.component.scss'],
+    standalone: false
 })
 export class DefaultStateControllerComponent extends StateControllerComponent implements OnInit, OnDestroy {
+
+  breadcrumbs$ = this.breadcrumbService.breadcrumbs$;
 
   constructor(protected router: Router,
               protected route: ActivatedRoute,
@@ -42,7 +46,8 @@ export class DefaultStateControllerComponent extends StateControllerComponent im
               private utils: UtilsService,
               private entityService: EntityService,
               private mobileService: MobileService,
-              private dashboardUtils: DashboardUtilsService) {
+              private dashboardUtils: DashboardUtilsService,
+              private breadcrumbService: BreadcrumbService) {
     super(router, route, ngZone, statesControllerService);
   }
 

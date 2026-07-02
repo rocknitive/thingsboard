@@ -20,7 +20,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/m
 import { EntityType } from '@shared/models/entity-type.models';
 import { MatDialog } from '@angular/material/dialog';
 import { AIModelDialogComponent, AIModelDialogData } from '@home/components/ai-model/ai-model-dialog.component';
-import { AiModel, AiRuleNodeResponseFormatTypeOnlyText, ResponseFormat } from '@shared/models/ai-model.models';
+import { AiModel, aiRuleNodeResponseFormats, ResponseFormat } from '@shared/models/ai-model.models';
 import { deepTrim } from '@core/utils';
 import { TranslateService } from '@ngx-translate/core';
 import { jsonRequired } from '@shared/components/json-object-edit.component';
@@ -28,9 +28,10 @@ import { Resource, ResourceType } from "@shared/models/resource.models";
 import { ResourcesDialogComponent, ResourcesDialogData } from "@home/components/resources/resources-dialog.component";
 
 @Component({
-  selector: 'tb-external-node-ai-config',
-  templateUrl: './ai-config.component.html',
-  styleUrls: []
+    selector: 'tb-external-node-ai-config',
+    templateUrl: './ai-config.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class AiConfigComponent extends RuleNodeConfigurationComponent {
 
@@ -39,6 +40,8 @@ export class AiConfigComponent extends RuleNodeConfigurationComponent {
   entityType = EntityType;
 
   responseFormat = ResponseFormat;
+
+  allowedResponseFormats: ResponseFormat[] = [ResponseFormat.TEXT, ResponseFormat.JSON, ResponseFormat.JSON_SCHEMA];
 
   EntityType = EntityType;
   ResourceType = ResourceType;
@@ -92,15 +95,12 @@ export class AiConfigComponent extends RuleNodeConfigurationComponent {
   }
 
   onEntityChange($event: AiModel) {
-    if ($event) {
-      if (AiRuleNodeResponseFormatTypeOnlyText.includes($event.configuration.provider)) {
-        if (this.aiConfigForm.get('responseFormat.type').value !== ResponseFormat.TEXT) {
-          this.aiConfigForm.get('responseFormat.type').patchValue(ResponseFormat.TEXT, {emitEvent: true});
-        }
-        this.aiConfigForm.get('responseFormat.type').disable({emitEvent: false});
-      }
-    } else {
-      this.aiConfigForm.get('responseFormat.type').enable({emitEvent: false});
+    this.allowedResponseFormats = $event
+      ? aiRuleNodeResponseFormats($event.configuration.provider)
+      : [ResponseFormat.TEXT, ResponseFormat.JSON, ResponseFormat.JSON_SCHEMA];
+    const typeControl = this.aiConfigForm.get('responseFormat.type');
+    if (!this.allowedResponseFormats.includes(typeControl.value)) {
+      typeControl.patchValue(this.allowedResponseFormats[0], {emitEvent: true});
     }
   }
 

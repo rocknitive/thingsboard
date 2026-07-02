@@ -37,10 +37,11 @@ import { DialogService } from '@core/services/dialog.service';
 import { IEntityDetailsPageComponent } from '@home/models/entity/entity-details-page-component.models';
 
 @Component({
-  selector: 'tb-entity-details-page',
-  templateUrl: './entity-details-page.component.html',
-  styleUrls: ['./entity-details-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'tb-entity-details-page',
+    templateUrl: './entity-details-page.component.html',
+    styleUrls: ['./entity-details-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EntityDetailsPageComponent extends EntityDetailsPanelComponent implements IEntityDetailsPageComponent, OnInit, OnDestroy {
 
@@ -97,7 +98,24 @@ export class EntityDetailsPageComponent extends EntityDetailsPanelComponent impl
         const id = paramMap.get('entityId');
         this.currentEntityId = { id, entityType };
         this.reload();
-        this.selectedTab = 0;
+        const queryParams = this.route.snapshot.queryParams;
+        let selectedTabIndex = 0;
+        if (queryParams['selectedTab']) {
+          this.router.navigate([], {
+            queryParams: {
+              selectedTab: null
+            },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+          if (this.entityTabsComponent) {
+            const selectedTab: string = queryParams['selectedTab'];
+            if (selectedTab) {
+              selectedTabIndex = this.entityTabsComponent.resolveTabIndex(selectedTab);
+            }
+          }
+        }
+        this.selectedTab = selectedTabIndex;
       }
     }));
   }

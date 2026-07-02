@@ -19,7 +19,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.TestSocketUtils;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -58,6 +61,16 @@ import static org.junit.Assert.assertNotNull;
 @Slf4j
 public abstract class AbstractMqttIntegrationTest extends AbstractTransportIntegrationTest {
 
+    public static final String MQTT_HOST = "localhost";
+    public static final int MQTT_PORT = TestSocketUtils.findAvailableTcpPort();
+    public static final String MQTT_URL = "tcp://" + MQTT_HOST + ":" + MQTT_PORT;
+
+    @DynamicPropertySource
+    static void props(DynamicPropertyRegistry registry) {
+        log.warn("transport.mqtt.bind_port = {}", MQTT_PORT);
+        registry.add("transport.mqtt.bind_port", () -> MQTT_PORT);
+    }
+
     protected Device savedGateway;
     protected String gatewayAccessToken;
 
@@ -75,7 +88,7 @@ public abstract class AbstractMqttIntegrationTest extends AbstractTransportInteg
             assertNotNull(accessToken);
         }
         if (config.getGatewayName() != null) {
-            savedGateway = createDevice(config.getGatewayName(), deviceProfile.getName(), true);
+            savedGateway = createDevice(config.getGatewayName(), deviceProfile.getName(), !config.isSparkplug);
             DeviceCredentials gatewayCredentials =
                     doGet("/api/device/" + savedGateway.getId().getId().toString() + "/credentials", DeviceCredentials.class);
             assertNotNull(gatewayCredentials);

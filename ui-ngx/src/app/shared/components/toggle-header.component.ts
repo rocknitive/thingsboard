@@ -33,7 +33,7 @@ import {
   OnInit,
   Output,
   QueryList,
-  SimpleChanges,
+  SimpleChanges, TemplateRef,
   ViewChild
 } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
@@ -50,6 +50,7 @@ import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-
 export interface ToggleHeaderOption {
   name: string;
   value: any;
+  template?: TemplateRef<any>;
   error$?: Observable<string>;
 }
 
@@ -61,12 +62,15 @@ export type ScrollDirection = 'after' | 'before';
   {
     // eslint-disable-next-line @angular-eslint/directive-selector
     selector: 'tb-toggle-option',
-  }
+    standalone: false
+}
 )
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ToggleOption implements OnChanges, OnDestroy {
 
   @Input() value: any;
+
+  @Input() template: TemplateRef<any>;
 
   @Input() error: string;
 
@@ -126,6 +130,7 @@ export abstract class _ToggleBase extends PageComponent implements AfterContentI
           {
             name: option.viewValue,
             value: option.value,
+            template: option.template,
             error$: option.currentError.asObservable()
           }
         );
@@ -136,9 +141,10 @@ export abstract class _ToggleBase extends PageComponent implements AfterContentI
 }
 
 @Component({
-  selector: 'tb-toggle-header',
-  templateUrl: './toggle-header.component.html',
-  styleUrls: ['./toggle-header.component.scss']
+    selector: 'tb-toggle-header',
+    templateUrl: './toggle-header.component.html',
+    styleUrls: ['./toggle-header.component.scss'],
+    standalone: false
 })
 export class ToggleHeaderComponent extends _ToggleBase implements OnInit, AfterViewInit, AfterContentInit,
   AfterContentChecked, AfterViewChecked, OnDestroy {

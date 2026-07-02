@@ -305,7 +305,8 @@ public class CalculatedFieldCtx implements Closeable {
     public void setTenantProfileProperties() {
         TenantProfile tenantProfile = systemContext.getTenantProfileCache().get(tenantId);
         if (tenantProfile == null) {
-            throw new IllegalStateException("Tenant Profile not found for tenant: " + tenantId);
+            log.warn("[{}][{}][{}] Tenant Profile not found for tenant: {}. CF limits and thresholds will not be updated.", tenantId, entityId, cfId, tenantId);
+            return;
         }
         tenantProfile.getProfileConfiguration().ifPresent(config -> {
             this.maxStateSize = config.getMaxStateSizeInKBytes() * 1024L;
@@ -387,7 +388,7 @@ public class CalculatedFieldCtx implements Closeable {
             tbelExpressions.put(expression, engine);
         } catch (Exception e) {
             initialized = false;
-            throw new RuntimeException("Failed to init calculated field ctx. Invalid expression syntax.", e);
+            throw new RuntimeException("Failed to initialize CF context. The script expression is invalid. Please check for syntax errors or unsupported functions.", e);
         }
     }
 
@@ -404,7 +405,7 @@ public class CalculatedFieldCtx implements Closeable {
             simpleExpressions.put(expression, compiledExpression);
         } else {
             initialized = false;
-            throw new RuntimeException("Failed to init calculated field ctx. Invalid expression syntax.");
+            throw new RuntimeException("Failed to initialize CF context. The expression has invalid syntax or unknown variables. Ensure all mathematical operators are correct.");
         }
     }
 
@@ -726,6 +727,9 @@ public class CalculatedFieldCtx implements Closeable {
                 return true;
             }
         }
+        if (cfType == CalculatedFieldType.PROPAGATION && !propagationArgument.equals(other.propagationArgument)) {
+            return true;
+        }
         if (hasGeofencingZoneGroupConfigurationChanges(other)) {
             return true;
         }
@@ -801,7 +805,7 @@ public class CalculatedFieldCtx implements Closeable {
     }
 
     public String getSizeExceedsLimitMessage() {
-        return "Failed to init CF state. State size exceeds limit of " + (maxStateSize / 1024) + "Kb!";
+        return "State size exceeds limit of " + (maxStateSize / 1024) + "Kb!";
     }
 
     public boolean hasCurrentOwnerSourceArguments() {

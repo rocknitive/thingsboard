@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.common.data.alarm.rule.condition.expression;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -23,11 +24,15 @@ import lombok.Data;
 import org.thingsboard.server.common.data.alarm.rule.condition.expression.predicate.ComplexFilterPredicate;
 import org.thingsboard.server.common.data.alarm.rule.condition.expression.predicate.FilterPredicateType;
 import org.thingsboard.server.common.data.alarm.rule.condition.expression.predicate.KeyFilterPredicate;
+import org.thingsboard.server.common.data.query.ComplexOperation;
 import org.thingsboard.server.common.data.query.EntityKeyValueType;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 import java.util.List;
 
+@Schema
 @Data
 public class AlarmConditionFilter implements Serializable {
 
@@ -36,6 +41,7 @@ public class AlarmConditionFilter implements Serializable {
     @NotNull
     private EntityKeyValueType valueType;
     private ComplexOperation operation;
+    @ArraySchema(schema = @Schema(ref = "#/components/schemas/AlarmRuleKeyFilterPredicate"))
     @Valid
     @NotEmpty
     private List<KeyFilterPredicate> predicates;

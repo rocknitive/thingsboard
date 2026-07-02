@@ -22,9 +22,10 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { EntityId } from "@shared/models/id/entity-id";
 
 @Component({
-  selector: 'tb-device-tabs',
-  templateUrl: './device-tabs.component.html',
-  styleUrls: []
+    selector: 'tb-device-tabs',
+    templateUrl: './device-tabs.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class DeviceTabsComponent extends EntityTabsComponent<DeviceInfo> {
 
@@ -36,6 +37,14 @@ export class DeviceTabsComponent extends EntityTabsComponent<DeviceInfo> {
 
   ngOnInit() {
     super.ngOnInit();
+  }
+
+  resolveTabIndex(tab: string): number {
+    if (tab === 'cf') {
+      return 3;
+    } else {
+      return super.resolveTabIndex(tab);
+    }
   }
 
   protected setEntity(entity: DeviceInfo) {

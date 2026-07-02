@@ -26,23 +26,29 @@ import {
 import { deepClone } from '@core/utils';
 import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-widget-actions-panel',
-  templateUrl: './widget-actions-panel.component.html',
-  styleUrls: [],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => WidgetActionsPanelComponent),
-      multi: true
-    }
-  ]
+    selector: 'tb-widget-actions-panel',
+    templateUrl: './widget-actions-panel.component.html',
+    styleUrls: [],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => WidgetActionsPanelComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class WidgetActionsPanelComponent implements ControlValueAccessor, OnInit {
 
   @Input()
   disabled: boolean;
+
+  @Input()
+  @coerceBoolean()
+  strokedPanel = false;
 
   actionsFormGroup: UntypedFormGroup;
 

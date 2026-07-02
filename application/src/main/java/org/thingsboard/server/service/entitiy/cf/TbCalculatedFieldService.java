@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.service.entitiy.cf;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.cf.CalculatedField;
 import org.thingsboard.server.common.data.cf.CalculatedFieldType;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -33,6 +35,8 @@ public interface TbCalculatedFieldService {
 
     PageData<CalculatedField> findByTenantIdAndEntityId(TenantId tenantId, EntityId entityId, CalculatedFieldType type, PageLink pageLink);
 
-    void delete(CalculatedField calculatedField, SecurityUser user);
+    void delete(CalculatedField calculatedField, User user);
+
+    JsonNode executeTestScript(TenantId tenantId, JsonNode inputParams);
 
 }

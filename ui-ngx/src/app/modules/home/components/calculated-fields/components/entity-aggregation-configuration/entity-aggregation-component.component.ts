@@ -37,7 +37,7 @@ import {
 } from '@shared/models/calculated-field.models';
 import { filter, map } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AVG_MONTH, AVG_QUARTER, DAY, HOUR, MINUTE, SECOND, WEEK, YEAR } from '@shared/models/time/time.models';
+import { AVG_MONTH, AVG_QUARTER, DAY, getDefaultTimezone, HOUR, MINUTE, SECOND, WEEK, YEAR } from '@shared/models/time/time.models';
 import { deepClone, isDefinedAndNotNull } from '@core/utils';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
 import { Store } from '@ngrx/store';
@@ -59,20 +59,21 @@ enum TimeCategory {
 }
 
 @Component({
-  selector: 'tb-entity-aggregation-component',
-  templateUrl: './entity-aggregation-component.component.html',
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => EntityAggregationComponentComponent),
-      multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => EntityAggregationComponentComponent),
-      multi: true
-    }
-  ],
+    selector: 'tb-entity-aggregation-component',
+    templateUrl: './entity-aggregation-component.component.html',
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => EntityAggregationComponentComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => EntityAggregationComponentComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class EntityAggregationComponentComponent implements ControlValueAccessor, Validator {
 
@@ -98,7 +99,7 @@ export class EntityAggregationComponentComponent implements ControlValueAccessor
     metrics: this.fb.control({}, notEmptyObjectValidator()),
     interval: this.fb.group({
       type: [AggIntervalType.HOUR],
-      tz: ['', Validators.required],
+      tz: [getDefaultTimezone(), Validators.required],
       durationSec: [this.minAllowedAggregationIntervalInSecForCF, Validators.required],
       allowOffsetSec: [false],
       offsetSec: [this.minAllowedAggregationIntervalInSecForCF > 60 ? MINUTE / SECOND : 1, Validators.required],

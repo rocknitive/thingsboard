@@ -46,10 +46,11 @@ import { mergeDeep } from '@core/utils';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 
 @Component({
-  selector: 'tb-time-series-chart-widget',
-  templateUrl: './time-series-chart-widget.component.html',
-  styleUrls: ['./time-series-chart-widget.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'tb-time-series-chart-widget',
+    templateUrl: './time-series-chart-widget.component.html',
+    styleUrls: ['./time-series-chart-widget.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -136,6 +137,7 @@ export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterV
 
   ngAfterViewInit() {
     this.timeSeriesChart = new TbTimeSeriesChart(this.ctx, this.settings, this.chartShape.nativeElement, this.renderer);
+    this.ctx.widgetActions = this.timeSeriesChart.getWidgetActions();
   }
 
   ngOnDestroy() {

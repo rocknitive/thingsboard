@@ -19,19 +19,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.service.install.lts.LtsVersion;
 import org.thingsboard.server.service.install.update.DefaultDataUpdateService;
 
-import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultDatabaseSchemaSettingsService implements DatabaseSchemaSettingsService {
 
-    // This list should include all versions that are compatible for the upgrade in 4 digits format (like 4.2.0.0, etc.).
-    // The compatibility cycle usually breaks when we have some scripts written in Java that may not work after a new release.
-    // TODO: don't check the "patch" number, since upgrade is not required for patch releases
-    private static final List<String> SUPPORTED_VERSIONS_FOR_UPGRADE = List.of("4.2.1.0", "4.2.1.1", "4.2.1.2");
+    // map of versions from which the upgrade to the current version is possible
+    // key - supported version prefix, value - display name
+    private static final Map<String, String> SUPPORTED_VERSIONS_FOR_UPGRADE = Map.of(
+            "4.3.0", "4.3.0.x",
+            "4.3.1", "4.3.1.x"
+    );
 
     private final ProjectInfo projectInfo;
     private final JdbcTemplate jdbcTemplate;
@@ -56,9 +59,9 @@ public class DefaultDatabaseSchemaSettingsService implements DatabaseSchemaSetti
             onSchemaSettingsError("Upgrade failed: database already upgraded to current version. You can set SKIP_SCHEMA_VERSION_CHECK to 'true' if force re-upgrade needed.");
         }
 
-        if (!SUPPORTED_VERSIONS_FOR_UPGRADE.contains(dbSchemaVersion)) {
+        if (SUPPORTED_VERSIONS_FOR_UPGRADE.keySet().stream().noneMatch(dbSchemaVersion::startsWith)) {
             onSchemaSettingsError(String.format("Upgrade failed: database version '%s' is not supported for upgrade. Supported versions are: %s.",
-                    dbSchemaVersion, SUPPORTED_VERSIONS_FOR_UPGRADE
+                    dbSchemaVersion, SUPPORTED_VERSIONS_FOR_UPGRADE.values()
             ));
         }
     }
@@ -73,7 +76,12 @@ public class DefaultDatabaseSchemaSettingsService implements DatabaseSchemaSetti
 
     @Override
     public void updateSchemaVersion() {
-        jdbcTemplate.execute("UPDATE tb_schema_settings SET schema_version = " + getPackageSchemaVersionForDb());
+        updateSchemaVersion(getPackageSchemaVersion());
+    }
+
+    @Override
+    public void updateSchemaVersion(String version) {
+        jdbcTemplate.execute("UPDATE tb_schema_settings SET schema_version = " + toDbVersion(version));
     }
 
     @Override
@@ -122,14 +130,12 @@ public class DefaultDatabaseSchemaSettingsService implements DatabaseSchemaSetti
     }
 
     private long getPackageSchemaVersionForDb() {
-        String[] versionParts = getPackageSchemaVersion().split("\\.");
+        return toDbVersion(getPackageSchemaVersion());
+    }
 
-        long major = Integer.parseInt(versionParts[0]);
-        long minor = Integer.parseInt(versionParts[1]);
-        long maintenance = Integer.parseInt(versionParts[2]);
-        long patch = Integer.parseInt(versionParts[3]);
-
-        return major * 1_000_000_000L + minor * 1_000_000L + maintenance * 1000L + patch;
+    private long toDbVersion(String version) {
+        LtsVersion v = LtsVersion.parse(version);
+        return v.major() * 1_000_000_000L + v.minor() * 1_000_000L + v.maintenance() * 1000L + v.patch();
     }
 
     private void onSchemaSettingsError(String message) {
@@ -138,14 +144,7 @@ public class DefaultDatabaseSchemaSettingsService implements DatabaseSchemaSetti
     }
 
     private String normalizeVersion(String version) {
-        String[] parts = version.split("\\.");
-
-        int major = Integer.parseInt(parts[0]);
-        int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        int maintenance = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-        int patch = parts.length > 3 ? Integer.parseInt(parts[3]) : 0;
-
-        return major + "." + minor + "." + maintenance + "." + patch;
+        return LtsVersion.parse(version).toString();
     }
 
 }

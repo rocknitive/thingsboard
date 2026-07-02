@@ -16,7 +16,7 @@
 
 -->
 <div class="debug-dialog-container flex flex-col xs:h-full">
-  <mat-toolbar color="primary">
+  <mat-toolbar class="tb-dialog-header">
     <h2>{{ data.title | translate}}</h2>
     <span class="flex-1"></span>
     <button mat-icon-button
@@ -35,7 +35,7 @@
       [entityId]="data.entityId"
       [functionTestButtonLabel]="data.functionTestButtonLabel ?? ''"
       [disableDebugEventAction]="data.debugActionDisabled"
-      (debugEventSelected)="this.onDebugEventSelected($event)"
+      (debugEventSelected)="onDebugEventSelected($event)"
     />
   </div>
   <div mat-dialog-actions class="justify-end">

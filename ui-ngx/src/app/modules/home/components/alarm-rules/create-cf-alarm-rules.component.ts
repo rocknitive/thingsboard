@@ -35,21 +35,22 @@ import { coerceBoolean } from "@shared/decorators/coercion";
 import { Observable } from "rxjs";
 
 @Component({
-  selector: 'tb-create-cf-alarm-rules',
-  templateUrl: './create-cf-alarm-rules.component.html',
-  styleUrls: ['./create-cf-alarm-rules.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => CreateCfAlarmRulesComponent),
-      multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => CreateCfAlarmRulesComponent),
-      multi: true,
-    }
-  ]
+    selector: 'tb-create-cf-alarm-rules',
+    templateUrl: './create-cf-alarm-rules.component.html',
+    styleUrls: ['./create-cf-alarm-rules.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => CreateCfAlarmRulesComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => CreateCfAlarmRulesComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class CreateCfAlarmRulesComponent implements ControlValueAccessor, Validator {
 
@@ -76,12 +77,16 @@ export class CreateCfAlarmRulesComponent implements ControlValueAccessor, Valida
   private usedSeverities: AlarmSeverity[] = [];
 
   private propagateChange = (v: any) => { };
+  private onValidatorChange = () => { };
 
   constructor(private fb: FormBuilder,
               private destroyRef: DestroyRef) {
     this.createAlarmRulesFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => this.updateModel());
+    this.createAlarmRulesFormGroup.statusChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.onValidatorChange());
   }
 
   registerOnChange(fn: any): void {
@@ -89,6 +94,10 @@ export class CreateCfAlarmRulesComponent implements ControlValueAccessor, Valida
   }
 
   registerOnTouched(fn: any): void {
+  }
+
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
   }
 
   createAlarmRulesFormArray(): UntypedFormArray {

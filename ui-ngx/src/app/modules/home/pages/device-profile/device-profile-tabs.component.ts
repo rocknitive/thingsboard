@@ -27,9 +27,10 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile-tabs',
-  templateUrl: './device-profile-tabs.component.html',
-  styleUrls: []
+    selector: 'tb-device-profile-tabs',
+    templateUrl: './device-profile-tabs.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class DeviceProfileTabsComponent extends EntityTabsComponent<DeviceProfile> implements OnInit {
 
@@ -56,6 +57,14 @@ export class DeviceProfileTabsComponent extends EntityTabsComponent<DeviceProfil
     ).subscribe(() => {
       this.isTransportTypeChanged = true;
     });
+  }
+
+  resolveTabIndex(tab: string): number {
+    if (tab === 'cf') {
+      return 2;
+    } else {
+      return super.resolveTabIndex(tab);
+    }
   }
 
   protected setEntity(entity: DeviceProfile) {

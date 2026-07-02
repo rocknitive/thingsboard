@@ -38,6 +38,7 @@ import { Timewindow, WidgetTimewindow } from '@shared/models/time/time.models';
 import {
   IAliasController,
   IStateController,
+  IWidgetHttpUtils,
   IWidgetSubscription,
   IWidgetUtils,
   RpcApi,
@@ -58,6 +59,13 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {
+  createDefaultHttpOptions,
+  defaultHttpOptions,
+  defaultHttpOptionsFromConfig,
+  defaultHttpOptionsFromParams,
+  defaultHttpUploadOptions
+} from '@core/http/http-utils';
 import { RafService } from '@core/services/raf.service';
 import { WidgetTypeId } from '@shared/models/id/widget-type-id';
 import { TenantId } from '@shared/models/id/tenant-id';
@@ -68,7 +76,8 @@ import {
   formatValue,
   getEntityDetailsPageURL,
   hasDatasourceLabelsVariables,
-  isDefined
+  isDefined,
+  isDefinedAndNotNull
 } from '@core/utils';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -142,13 +151,15 @@ export interface WidgetHeaderAction extends IWidgetAction {
 }
 
 export interface WidgetAction extends IWidgetAction {
-  show: boolean;
+  show: boolean | (()=> boolean);
 }
 
 export interface IDashboardWidget {
   updateWidgetParams(): void;
   updateParamsFromData(detectChanges?: boolean): void;
 }
+
+export type WidgetDestroyCallback = () => void;
 
 export class WidgetContext {
 
@@ -294,6 +305,14 @@ export class WidgetContext {
     getEntityDetailsPageURL
   };
 
+  httpUtils: IWidgetHttpUtils = {
+    defaultHttpOptions,
+    defaultHttpOptionsFromConfig,
+    defaultHttpOptionsFromParams,
+    defaultHttpUploadOptions,
+    createDefaultHttpOptions
+  };
+
   $widgetElement: JQuery<HTMLElement>;
   $container: JQuery<HTMLElement>;
   $containerParent: JQuery<HTMLElement>;
@@ -346,6 +365,8 @@ export class WidgetContext {
     ...RxJSOperators
   };
 
+  private destroyCallbacks: WidgetDestroyCallback[] = [];
+
   registerPopoverComponent(popoverComponent: TbPopoverComponent) {
     this.popoverComponents.push(popoverComponent);
     popoverComponent.tbDestroy.subscribe(() => {
@@ -383,6 +404,10 @@ export class WidgetContext {
     for (const labelPattern of this.labelPatterns.values()) {
       labelPattern.update();
     }
+  }
+
+  registerDestroyCallback(destroyCallback: WidgetDestroyCallback) {
+    this.destroyCallbacks.push(destroyCallback);
   }
 
   showSuccessToast(message: string, duration: number = 1000,
@@ -501,6 +526,13 @@ export class WidgetContext {
       labelPattern.destroy();
     }
     this.labelPatterns.clear();
+    this.destroyCallbacks.forEach((destroyCallback) => {
+        try {
+          destroyCallback()
+        } catch (_ignoredError) { /* empty */ }
+      }
+    );
+    this.destroyCallbacks.length = 0;
     this.width = undefined;
     this.height = undefined;
     this.destroyed = true;
@@ -555,7 +587,9 @@ export class LabelVariablePattern {
         const entityInfo = this.ctx.defaultSubscription.getFirstEntityInfo();
         label = createLabelFromSubscriptionEntityInfo(entityInfo, label);
       } else {
-        const datasource = this.ctx.defaultSubscription?.firstDatasource ?? (this.ctx as any).mapInstance?.getData()[0];
+        const datasource = isDefinedAndNotNull(this.ctx.defaultSubscription)
+          ? this.ctx.defaultSubscription.firstDatasource ?? undefined
+          : (this.ctx as any).mapInstance?.getData()[0];
         label = createLabelFromDatasource(datasource, label);
       }
     }

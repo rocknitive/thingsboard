@@ -130,11 +130,12 @@ import { HttpClient } from '@angular/common/http';
 import { addDiagnosticChain } from '@angular/compiler-cli/src/ngtsc/diagnostics';
 
 @Component({
-  selector: 'tb-widget',
-  templateUrl: './widget.component.html',
-  styleUrls: ['./widget.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'tb-widget',
+    templateUrl: './widget.component.html',
+    styleUrls: ['./widget.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WidgetComponent extends PageComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -277,6 +278,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
       elementClick: this.elementClick.bind(this),
       cardClick: this.cardClick.bind(this),
       click: this.click.bind(this),
+      invokeAction: this.invokeAction.bind(this),
       getActiveEntityInfo: this.getActiveEntityInfo.bind(this),
       openDashboardStateInSeparateDialog: this.openDashboardStateInSeparateDialog.bind(this),
       openDashboardStateInPopover: this.openDashboardStateInPopover.bind(this),
@@ -333,6 +335,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     if (customHeaderActions$.length) {
       forkJoin(customHeaderActions$).subscribe((customHeaderActions) => {
         this.widgetContext.customHeaderActions.push(...customHeaderActions);
+        this.dashboardWidget.updateParamsFromData(true);
       });
     }
 
@@ -377,23 +380,23 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     const buttonStyle = {};
     switch (buttonType) {
       case WidgetHeaderActionButtonType.basic:
-        buttonStyle['--mdc-text-button-label-text-color'] = buttonColor;
+        buttonStyle['--mat-button-text-label-text-color'] = buttonColor;
         break;
       case WidgetHeaderActionButtonType.raised:
-        buttonStyle['--mdc-protected-button-label-text-color'] = buttonColor;
-        buttonStyle['--mdc-protected-button-container-color'] = backgroundColor;
+        buttonStyle['--mat-button-protected-label-text-color'] = buttonColor;
+        buttonStyle['--mat-button-protected-container-color'] = backgroundColor;
         break;
       case WidgetHeaderActionButtonType.stroked:
-        buttonStyle['--mdc-outlined-button-label-text-color'] = buttonColor;
-        buttonStyle['--mdc-outlined-button-outline-color'] = borderColor;
+        buttonStyle['--mat-button-outlined-label-text-color'] = buttonColor;
+        buttonStyle['--mat-button-outlined-outline-color'] = borderColor;
         break;
       case WidgetHeaderActionButtonType.flat:
-        buttonStyle['--mdc-filled-button-label-text-color'] = buttonColor;
-        buttonStyle['--mdc-filled-button-container-color'] = backgroundColor;
+        buttonStyle['--mat-button-filled-label-text-color'] = buttonColor;
+        buttonStyle['--mat-button-filled-container-color'] = backgroundColor;
         break;
       case WidgetHeaderActionButtonType.miniFab:
         buttonStyle['--mat-fab-small-foreground-color'] = buttonColor;
-        buttonStyle['--mdc-fab-small-container-color'] = backgroundColor;
+        buttonStyle['--mat-fab-small-container-color'] = backgroundColor;
         break;
       default:
         buttonStyle['--mat-icon-color'] = buttonColor;
@@ -682,6 +685,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
   }
 
   private reInitImpl() {
+    this.displayNoData = false;
     this.onDestroy();
     if (!this.typeParameters.useCustomDatasources) {
       this.createDefaultSubscription().subscribe({
@@ -725,7 +729,6 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
           subscriptionChanged = subscriptionChanged || subscription.onAliasesChanged(aliasIds);
         }
         if (subscriptionChanged && !this.typeParameters.useCustomDatasources) {
-          this.displayNoData = false;
           this.reInit();
         }
       }
@@ -739,7 +742,6 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
           subscriptionChanged = subscriptionChanged || subscription.onFiltersChanged(filterIds);
         }
         if (subscriptionChanged && !this.typeParameters.useCustomDatasources) {
-          this.displayNoData = false;
           this.reInit();
         }
       }
@@ -1612,6 +1614,16 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     const descriptors = this.getActionDescriptors(sourceId);
     if (descriptors.length) {
       this.onWidgetAction($event, descriptors[0]);
+    }
+  }
+
+  private invokeAction($event: Event, actionName: string, additionalParams?: any) {
+    const descriptors = this.getActionDescriptors('javaScript');
+    if (descriptors?.length) {
+      const found = descriptors.find(d => d.name === actionName);
+      if (found) {
+        this.handleWidgetAction($event, found, null, null, additionalParams);
+      }
     }
   }
 

@@ -38,21 +38,22 @@ import { coerceBoolean } from "@shared/decorators/coercion";
 import { Observable } from "rxjs";
 
 @Component({
-  selector: 'tb-cf-alarm-rule',
-  templateUrl: './cf-alarm-rule.component.html',
-  styleUrls: ['./cf-alarm-rule.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => CfAlarmRuleComponent),
-      multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => CfAlarmRuleComponent),
-      multi: true,
-    }
-  ]
+    selector: 'tb-cf-alarm-rule',
+    templateUrl: './cf-alarm-rule.component.html',
+    styleUrls: ['./cf-alarm-rule.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => CfAlarmRuleComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => CfAlarmRuleComponent),
+            multi: true,
+        }
+    ],
+    standalone: false
 })
 export class CfAlarmRuleComponent implements ControlValueAccessor, OnInit, Validator {
 
@@ -83,6 +84,7 @@ export class CfAlarmRuleComponent implements ControlValueAccessor, OnInit, Valid
   });
 
   private propagateChange = (v: any) => { };
+  private onValidatorChange = () => { };
 
   constructor(private dialog: MatDialog,
               private fb: FormBuilder,
@@ -96,11 +98,20 @@ export class CfAlarmRuleComponent implements ControlValueAccessor, OnInit, Valid
   registerOnTouched(fn: any): void {
   }
 
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
+  }
+
   ngOnInit() {
     this.alarmRuleFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.updateModel();
+    });
+    this.alarmRuleFormGroup.statusChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      this.onValidatorChange();
     });
   }
 

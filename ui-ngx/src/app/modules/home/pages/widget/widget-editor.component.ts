@@ -18,7 +18,6 @@ import { PageComponent } from '@shared/components/page.component';
 import {
   Component,
   ElementRef,
-  EventEmitter,
   Inject,
   OnDestroy,
   OnInit,
@@ -74,14 +73,17 @@ import { JsFuncModulesComponent } from '@shared/components/js-func-modules.compo
 import { MatIconButton } from '@angular/material/button';
 import { formPropertyCompletions } from '@shared/models/dynamic-form.models';
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
+import { BreadcrumbService } from '@core/services/breadcrumb.service';
+import { HomeService } from '@core/services/home.service';
 import Timeout = NodeJS.Timeout;
 
 // @dynamic
 @Component({
-  selector: 'tb-widget-editor',
-  templateUrl: './widget-editor.component.html',
-  styleUrls: ['./widget-editor.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'tb-widget-editor',
+    templateUrl: './widget-editor.component.html',
+    styleUrls: ['./widget-editor.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class WidgetEditorComponent extends PageComponent implements OnInit, OnDestroy, HasDirtyFlag {
 
@@ -171,7 +173,7 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
 
   hotKeys: Hotkey[] = [];
 
-  updateBreadcrumbs = new EventEmitter();
+  breadcrumbs$ = this.breadcrumbService.breadcrumbs$;
 
   private rxSubscriptions = new Array<Subscription>();
 
@@ -187,7 +189,9 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private customTranslate: CustomTranslatePipe,
-              private http: HttpClient) {
+              private http: HttpClient,
+              private breadcrumbService: BreadcrumbService,
+              public homeService: HomeService) {
     super(store);
 
     this.authUser = getCurrentAuthUser(store);
@@ -220,6 +224,7 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
   }
 
   ngOnInit(): void {
+    this.homeService.setHideMainToolbar(true);
     this.initSplitLayout();
     this.initAceEditors();
     this.iframe = $(this.widgetIFrameElmRef.nativeElement);
@@ -236,6 +241,10 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
       subscription.unsubscribe();
     });
     this.rxSubscriptions.length = 0;
+  }
+
+  toggleSidenav() {
+    this.homeService.toggleSideBar.emit();
   }
 
   private initHotKeys(): void {
@@ -356,11 +365,12 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
         this.jsEditor.on('change', () => {
           this.cleanupJsErrors();
         });
-        if (!(this.jsEditor as any).completer) {
+        if (!this.jsEditor.completer) {
           this.jsEditor.execCommand("startAutocomplete");
-          (this.jsEditor as any).completer.detach();
+          this.jsEditor.completer.detach();
         }
-        (this.jsEditor as any).completer.popup.container.style.width = '500px';
+        (this.jsEditor.completer as Ace.Autocomplete).editor = this.jsEditor;
+        (this.jsEditor.completer as Ace.Autocomplete).getPopup().container.style.width = '500px';
         this.initialCompleters = this.jsEditor.completers || [];
       })
     ));
@@ -626,7 +636,6 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
     this.widget.defaultConfig = JSON.stringify(config);
     this.origWidget = deepClone(this.widget);
     this.isDirty = false;
-    this.updateBreadcrumbs.emit();
   }
 
   applyWidgetScript(): void {

@@ -30,10 +30,10 @@ import {
   OnInit,
   Optional,
   Renderer2,
-  StaticProvider,
   ViewChild,
   ViewContainerRef,
-  ViewEncapsulation
+  ViewEncapsulation,
+  DOCUMENT
 } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
@@ -78,7 +78,6 @@ import {
   WidgetConfig,
   WidgetInfo,
   WidgetPosition,
-  widgetType,
   widgetTypesData
 } from '@shared/models/widget.models';
 import { environment as env } from '@env/environment';
@@ -126,13 +125,6 @@ import { ImportExportService } from '@shared/import-export/import-export.service
 import { AuthState } from '@app/core/auth/auth.models';
 import { FiltersDialogComponent, FiltersDialogData } from '@home/components/filter/filters-dialog.component';
 import { Filters } from '@shared/models/query/query.models';
-import { ConnectedPosition, Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
-import {
-  DISPLAY_WIDGET_TYPES_PANEL_DATA,
-  DisplayWidgetTypesPanelComponent,
-  DisplayWidgetTypesPanelData
-} from '@home/components/dashboard-page/widget-types-panel.component';
 import { DashboardWidgetSelectComponent } from '@home/components/dashboard-page/dashboard-widget-select.component';
 import { MobileService } from '@core/services/mobile.service';
 
@@ -143,9 +135,9 @@ import {
 } from '@home/components/dashboard-page/dashboard-image-dialog.component';
 import { SafeUrl } from '@angular/platform-browser';
 import cssjs from '@core/css/css';
-import { DOCUMENT } from '@angular/common';
+
 import { IAliasController } from '@core/api/widget-api.models';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
 import { TbPopoverService } from '@shared/components/popover.service';
 import { catchError, distinctUntilChanged, map, skip, tap } from 'rxjs/operators';
@@ -157,14 +149,16 @@ import {
   MoveWidgetsDialogResult
 } from '@home/components/dashboard-page/layout/move-widgets-dialog.component';
 import { HttpStatusCode } from '@angular/common/http';
+import { HomeService } from '@core/services/home.service';
 
 // @dynamic
 @Component({
-  selector: 'tb-dashboard-page',
-  templateUrl: './dashboard-page.component.html',
-  styleUrls: ['./dashboard-page.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'tb-dashboard-page',
+    templateUrl: './dashboard-page.component.html',
+    styleUrls: ['./dashboard-page.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DashboardPageComponent extends PageComponent implements IDashboardController, HasDirtyFlag, OnInit, AfterViewInit, OnDestroy {
 
@@ -207,6 +201,9 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   }
 
   @Input()
+  hideMainToolbar = true;
+
+  @Input()
   syncStateWithQueryParam = true;
 
   @Input()
@@ -243,7 +240,6 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   forceDashboardMobileMode = false;
   isAddingWidget = false;
   isAddingWidgetClosed = true;
-  filterWidgetTypes: widgetType[] = null;
 
   isToolbarOpened = false;
   isToolbarOpenedAnimate = false;
@@ -275,7 +271,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   dashboardLogoLink = this.getDashboardLogoLink();
 
   private dashboardLogoCache: SafeUrl;
-  private defaultDashboardLogo = 'assets/logo_title_white.svg';
+  private defaultDashboardLogo = 'assets/logo_title_black.svg';
 
   private dashboardResize$: ResizeObserver;
 
@@ -346,7 +342,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   }
 
   get mobileDisplayRightLayoutFirst(): boolean {
-    return this.isMobile && this.layouts.right.layoutCtx.gridSettings?.mobileDisplayLayoutFirst;
+    return this.isMobile && this.layouts.right.show && this.layouts.right.layoutCtx.gridSettings?.mobileDisplayLayoutFirst;
   }
 
   set mobileDisplayRightLayoutFirst(mobileDisplayRightLayoutFirst: boolean) {
@@ -379,11 +375,11 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
               private renderer: Renderer2,
               private ngZone: NgZone,
               @Optional() @Inject('embeddedValue') private embeddedValue,
-              private overlay: Overlay,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef,
               public elRef: ElementRef,
-              private injector: Injector) {
+              private injector: Injector,
+              public homeService: HomeService) {
     super(store);
     if (isDefinedAndNotNull(this.embeddedValue)) {
       this.embedded = this.embeddedValue;
@@ -391,6 +387,9 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   }
 
   ngOnInit() {
+    if (this.hideMainToolbar) {
+      this.homeService.setHideMainToolbar(true);
+    }
     this.rxSubscriptions.push(this.route.data.subscribe(
       (data) => {
         let dashboardPageInitData: DashboardPageInitData;
@@ -653,7 +652,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
 
   private hideToolbarSetting(): boolean {
     if (isDefined(this.dashboard.configuration?.settings?.hideToolbar)) {
-      const canApplyHideSetting = !this.forceFullscreen || this.isMobileApp;
+      const canApplyHideSetting = !this.forceFullscreen || this.isMobileApp || this.isPublicUser();
       return this.dashboard.configuration.settings.hideToolbar && canApplyHideSetting;
     } else {
       return false;
@@ -874,6 +873,10 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
 
   public isSystemAdmin(): boolean {
     return this.authUser.authority === Authority.SYS_ADMIN;
+  }
+
+  public canEdit(): boolean {
+    return this.isTenantAdmin() || (this.isSystemAdmin() && this.widgetEditMode);
   }
 
   public exportDashboard($event: Event) {
@@ -1687,59 +1690,6 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     return widgetContextActions;
   }
 
-  clearSelectedWidgetBundle() {
-    this.dashboardWidgetSelectComponent.search = '';
-    this.dashboardWidgetSelectComponent.widgetsBundle = null;
-    this.dashboardWidgetSelectComponent.selectWidgetMode = 'bundles';
-  }
-
-  editWidgetsTypesToDisplay($event: Event) {
-    if ($event) {
-      $event.stopPropagation();
-    }
-    const target = $event.target || $event.currentTarget;
-    const config = new OverlayConfig();
-    config.backdropClass = 'cdk-overlay-transparent-backdrop';
-    config.hasBackdrop = true;
-    const connectedPosition: ConnectedPosition = {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top'
-    };
-    config.positionStrategy = this.overlay.position().flexibleConnectedTo(target as HTMLElement)
-      .withPositions([connectedPosition]);
-
-    const overlayRef = this.overlay.create(config);
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef.dispose();
-    });
-
-    const filterWidgetTypes = this.dashboardWidgetSelectComponent.filterWidgetTypes;
-    const widgetTypesList = Array.from(this.dashboardWidgetSelectComponent.widgetTypes.values()).map(type =>
-      ({type, display: filterWidgetTypes === null ? true : filterWidgetTypes.includes(type)}));
-
-    const providers: StaticProvider[] = [
-      {
-        provide: DISPLAY_WIDGET_TYPES_PANEL_DATA,
-        useValue: {
-          types: widgetTypesList,
-          typesUpdated: (newTypes) => {
-            this.filterWidgetTypes = newTypes.filter(type => type.display).map(type => type.type);
-            this.cd.markForCheck();
-          }
-        } as DisplayWidgetTypesPanelData
-      },
-      {
-        provide: OverlayRef,
-        useValue: overlayRef
-      }
-    ];
-    const injector = Injector.create({parent: this.viewContainerRef.injector, providers});
-    overlayRef.attach(new ComponentPortal(DisplayWidgetTypesPanelComponent, this.viewContainerRef, injector));
-    this.cd.markForCheck();
-  }
-
   public updateDashboardImage($event: Event) {
     if ($event) {
       $event.stopPropagation();
@@ -1760,7 +1710,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     });
   }
 
-  toggleVersionControl($event: Event, versionControlButton: MatButton) {
+  toggleVersionControl($event: Event, versionControlButton: MatButton | MatIconButton) {
     if ($event) {
       $event.stopPropagation();
     }
@@ -1805,6 +1755,10 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
         });
       });
     }
+  }
+
+  toggleSidenav() {
+    this.homeService.toggleSideBar.emit();
   }
 
   get showMainLayoutFiller(): boolean {

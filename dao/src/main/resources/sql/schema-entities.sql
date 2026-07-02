@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS rule_chain (
     created_time bigint NOT NULL,
     additional_info varchar,
     configuration varchar(10000000),
+    notes varchar(1000000),
     name varchar(255),
     type varchar(255),
     first_rule_node_id uuid,
@@ -935,6 +936,7 @@ CREATE TABLE IF NOT EXISTS calculated_field (
     configuration varchar(1000000),
     version BIGINT DEFAULT 1,
     debug_settings varchar(1024),
+    additional_info varchar,
     CONSTRAINT calculated_field_unq_key UNIQUE (entity_id, type, name)
 );
 
@@ -977,4 +979,16 @@ CREATE TABLE IF NOT EXISTS ai_model (
     configuration   JSONB         NOT NULL,
     CONSTRAINT ai_model_name_unq_key        UNIQUE (tenant_id, name),
     CONSTRAINT ai_model_external_id_unq_key UNIQUE (tenant_id, external_id)
+);
+
+CREATE TABLE IF NOT EXISTS iot_hub_installed_item (
+    id              UUID          NOT NULL PRIMARY KEY,
+    created_time    BIGINT        NOT NULL,
+    tenant_id       UUID          NOT NULL,
+    item_id         UUID          NOT NULL,
+    item_version_id UUID          NOT NULL,
+    item_name       VARCHAR       NOT NULL,
+    item_type       VARCHAR       NOT NULL,
+    version         VARCHAR       NOT NULL,
+    descriptor      JSONB         NOT NULL
 );

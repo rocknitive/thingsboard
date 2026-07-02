@@ -127,9 +127,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-/**
- * Created by ashvayka on 17.10.18.
- */
 @Slf4j
 @Service
 @TbTransportComponent
@@ -156,6 +153,8 @@ public class DefaultTransportService extends TransportActivityManager implements
     private int notificationsPollDuration;
     @Value("${transport.stats.enabled:false}")
     private boolean statsEnabled;
+    @Value("${transport.callback_thread_pool_size:20}")
+    private int callbackThreadPoolSize;
 
     @Autowired
     @Lazy
@@ -201,7 +200,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         this.ruleEngineProducerStats = statsFactory.createMessagesStats(StatsType.RULE_ENGINE.getName() + ".producer");
         this.tbCoreProducerStats = statsFactory.createMessagesStats(StatsType.CORE.getName() + ".producer");
         this.transportApiStats = statsFactory.createMessagesStats(StatsType.TRANSPORT.getName() + ".producer");
-        this.transportCallbackExecutor = ThingsBoardExecutors.newWorkStealingPool(20, getClass());
+        this.transportCallbackExecutor = ThingsBoardExecutors.newWorkStealingPool(callbackThreadPoolSize, getClass());
         this.scheduler.scheduleAtFixedRate(this::invalidateRateLimits, new Random().nextInt((int) sessionReportTimeout), sessionReportTimeout, TimeUnit.MILLISECONDS);
         transportApiRequestTemplate = queueProvider.createTransportApiRequestTemplate();
         transportApiRequestTemplate.setMessagesStats(transportApiStats);
@@ -508,7 +507,9 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.SessionEventMsg msg, TransportServiceCallback<Void> callback) {
         if (checkLimits(sessionInfo, msg, callback)) {
-            recordActivityInternal(sessionInfo);
+            if (msg.getEvent() != TransportProtos.SessionEvent.CLOSED) {
+                recordActivityInternal(sessionInfo);
+            }
             sendToDeviceActor(sessionInfo, TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo)
                     .setSessionEvent(msg).build(), callback);
         }
@@ -789,7 +790,7 @@ public class DefaultTransportService extends TransportActivityManager implements
 
         TransportProtos.SessionCloseNotificationProto notification = TransportProtos.SessionCloseNotificationProto.newBuilder().setMessage("session timeout!").build();
 
-        ScheduledFuture executorFuture = scheduler.schedule(() -> {
+        ScheduledFuture<?> executorFuture = scheduler.schedule(() -> {
             listener.onRemoteSessionCloseCommand(sessionId, notification);
             deregisterSession(sessionInfo);
         }, timeout, TimeUnit.MILLISECONDS);
@@ -1169,6 +1170,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         public void onFailure(Throwable t) {
             DefaultTransportService.this.transportCallbackExecutor.submit(() -> callback.onError(t));
         }
+
     }
 
     private static class StatsCallback implements TbQueueCallback {
@@ -1183,16 +1185,19 @@ public class DefaultTransportService extends TransportActivityManager implements
         @Override
         public void onSuccess(TbQueueMsgMetadata metadata) {
             stats.incrementSuccessful();
-            if (callback != null)
+            if (callback != null) {
                 callback.onSuccess(metadata);
+            }
         }
 
         @Override
         public void onFailure(Throwable t) {
             stats.incrementFailed();
-            if (callback != null)
+            if (callback != null) {
                 callback.onFailure(t);
+            }
         }
+
     }
 
     private class MsgPackCallback implements TbQueueCallback {
@@ -1215,6 +1220,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         public void onFailure(Throwable t) {
             DefaultTransportService.this.transportCallbackExecutor.submit(() -> callback.onError(t));
         }
+
     }
 
     private class ApiStatsProxyCallback<T> implements TransportServiceCallback<T> {
@@ -1244,6 +1250,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         public void onError(Throwable e) {
             callback.onError(e);
         }
+
     }
 
     @Override
@@ -1257,9 +1264,21 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
-    public void createGaugeStats(String statsName, AtomicInteger number) {
-        statsFactory.createGauge(StatsType.TRANSPORT + "." + statsName, number);
-        statsMap.put(statsName, number);
+    public void createGaugeStats(String statsName, AtomicInteger number, String... tags) {
+        String key = "thingsboard" + "." + StatsType.TRANSPORT.getName() + "." + statsName;
+        statsFactory.createGauge(key, number, tags);
+        statsMap.put(statsName + tagsKey(tags), number);
+    }
+
+    private String tagsKey(String... tags) {
+        if (tags == null || tags.length < 2) return "";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < tags.length; i += 2) {
+            if (i > 0) sb.append(',');
+            sb.append(tags[i]).append('=').append(i + 1 < tags.length ? tags[i + 1] : "");
+        }
+        sb.append(']');
+        return sb.toString();
     }
 
     @Scheduled(fixedDelayString = "${transport.stats.print-interval-ms:60000}")
@@ -1270,4 +1289,5 @@ public class DefaultTransportService extends TransportActivityManager implements
             log.info("Transport Stats: {}", values);
         }
     }
+
 }
