@@ -398,6 +398,44 @@ public class DefaultCoapClientContext implements CoapClientContext {
     }
 
     @Override
+    public void sendBestEffortSubscriptionTerminationNotifications() {
+        clients.values().forEach(state -> {
+            state.lock();
+            try {
+                TbCoapObservationState attrs = state.getAttrs();
+                TbCoapObservationState rpc = state.getRpc();
+                if (attrs != null) {
+                    clientsByToken.remove(attrs.getToken(), state);
+                    state.setAttrs(null);
+                }
+                if (rpc != null) {
+                    clientsByToken.remove(rpc.getToken(), state);
+                    state.setRpc(null);
+                }
+                sendBestEffortSubscriptionTermination(state, attrs, "attributes");
+                sendBestEffortSubscriptionTermination(state, rpc, "RPC");
+            } finally {
+                state.unlock();
+            }
+        });
+        clientsByToken.clear();
+        clients.clear();
+    }
+
+    private void sendBestEffortSubscriptionTermination(TbCoapClientState state, TbCoapObservationState observation, String subscriptionType) {
+        if (observation == null) {
+            return;
+        }
+        Response response = new Response(CoAP.ResponseCode.DELETED);
+        response.setType(CoAP.Type.NON);
+        try {
+            observation.getExchange().respond(response);
+        } catch (RuntimeException e) {
+            log.debug("[{}] Failed to send best-effort {} subscription termination notification", state.getDeviceId(), subscriptionType, e);
+        }
+    }
+
+    @Override
     public TbCoapClientState getOrCreateClient(CoapSessionMsgType type, ValidateDeviceCredentialsResponse deviceCredentials, DeviceProfile deviceProfile) throws AdaptorException {
         DeviceId deviceId = deviceCredentials.getDeviceInfo().getDeviceId();
         TbCoapClientState state = getClientState(deviceId);

@@ -73,6 +73,7 @@ public class CoapTransportService implements TbTransportService {
 
     @PreDestroy
     public void shutdown() {
+        coapTransportContext.getClientContext().sendBestEffortSubscriptionTerminationNotifications();
         log.info("CoAP transport stopped!");
     }
 
