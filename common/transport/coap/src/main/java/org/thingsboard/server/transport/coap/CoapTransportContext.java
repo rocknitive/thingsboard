@@ -41,9 +41,6 @@ import java.util.concurrent.ConcurrentMap;
 @Getter
 public class CoapTransportContext extends TransportContext {
 
-    @Value("${transport.sessions.report_timeout}")
-    private long sessionReportTimeout;
-
     @Getter
     @Value("${transport.coap.timeout}")
     private Long timeout;

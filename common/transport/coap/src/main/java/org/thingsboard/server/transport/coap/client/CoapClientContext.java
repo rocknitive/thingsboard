@@ -41,8 +41,6 @@ public interface CoapClientContext {
 
     void deregisterRpcObservation(TbCoapClientState clientState, String token, CoapExchange exchange);
 
-    void reportActivity();
-
     void registerObserveRelation(String token, ObserveRelation relation);
 
     void deregisterObserveRelation(String token);

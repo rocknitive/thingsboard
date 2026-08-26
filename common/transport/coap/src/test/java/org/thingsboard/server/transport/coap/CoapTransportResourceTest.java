@@ -19,6 +19,7 @@ import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Request;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,6 +36,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class CoapTransportResourceTest {
@@ -51,6 +53,7 @@ class CoapTransportResourceTest {
     private static final Random RANDOM = new Random();
 
     private static CoapTransportResource coapTransportResource;
+    private static SchedulerComponent schedulerComponentMock;
 
     @BeforeAll
     static void setUp() {
@@ -59,14 +62,18 @@ class CoapTransportResourceTest {
         var coapServerServiceMock = mock(CoapServerService.class);
         var transportServiceMock = mock(TransportService.class);
         var clientContextMock = mock(CoapClientContext.class);
-        var schedulerComponentMock = mock(SchedulerComponent.class);
+        schedulerComponentMock = mock(SchedulerComponent.class);
 
         when(ctxMock.getTransportService()).thenReturn(transportServiceMock);
         when(ctxMock.getClientContext()).thenReturn(clientContextMock);
-        when(ctxMock.getSessionReportTimeout()).thenReturn(1L);
         when(ctxMock.getScheduler()).thenReturn(schedulerComponentMock);
 
         coapTransportResource = new CoapTransportResource(ctxMock, coapServerServiceMock, V1);
+    }
+
+    @Test
+    void givenResourceCreated_whenCheckingScheduler_thenSyntheticActivityIsNotScheduled() {
+        verifyNoInteractions(schedulerComponentMock);
     }
 
     @ParameterizedTest

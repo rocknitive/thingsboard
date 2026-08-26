@@ -53,7 +53,6 @@ import java.net.InetSocketAddress;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -83,8 +82,6 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         this.timeout = ctx.getTimeout();
         this.piggybackTimeout = ctx.getPiggybackTimeout();
         this.clients = ctx.getClientContext();
-        long sessionReportTimeout = ctx.getSessionReportTimeout();
-        ctx.getScheduler().scheduleAtFixedRate(clients::reportActivity, new Random().nextInt((int) sessionReportTimeout), sessionReportTimeout, TimeUnit.MILLISECONDS);
     }
 
     @Override

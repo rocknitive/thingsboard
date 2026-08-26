@@ -210,15 +210,6 @@ public class DefaultCoapClientContext implements CoapClientContext {
         }
     }
 
-    @Override
-    public void reportActivity() {
-        for (TbCoapClientState state : clients.values()) {
-            if (state.getSession() != null) {
-                transportService.recordActivity(state.getSession());
-            }
-        }
-    }
-
     private void onUplink(TbCoapClientState client, boolean notifyOtherServers, long uplinkTs) {
         PowerMode powerMode = client.getPowerMode();
         PowerSavingConfiguration profileSettings = null;
@@ -534,7 +525,13 @@ public class DefaultCoapClientContext implements CoapClientContext {
                     response.setConfirmable(conRequest);
                     response.setMID(requestId);
                     if (conRequest) {
-                        response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> awake(state), id -> asleep(state)));
+                        response.addMessageObserver(new TbCoapMessageObserver(requestId, id -> {
+                            awake(state);
+                            TransportProtos.SessionInfoProto session = state.getSession();
+                            if (session != null) {
+                                transportService.recordActivity(session);
+                            }
+                        }, id -> asleep(state)));
                     }
                     respond(attrs.getExchange(), response, state.getContentFormat());
                 } catch (AdaptorException e) {
